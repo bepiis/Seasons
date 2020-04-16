@@ -1,0 +1,54 @@
+prefix: '&8[&6&lSeasons&8]'
+
+totalpoints: 10000
+
+Challenges:
+  1:
+    challenge:
+      activationEvent: 'EntityDeath'
+      conditions: 'EntityType:PIG.Material:DIAMOND_SWORD'
+      count: 3
+      message: 'Kill 3 pigs'
+      gui_item: 'DIAMOND_BLOCK'
+
+Tiers:
+  1:
+    title: '&cfirst tier'
+    guiItem: 'DIAMOND_BLOCK'
+    lore:
+      - '&3this is the first line'
+      - '&3second line'
+      - '&3third line'
+    rewards:
+      1:
+        type: 'item'
+        amount: 1
+        meta:
+          type: 'DIAMOND_SWORD'
+          display-name: 'A sword'
+          lore:
+            - '&6&lThis'
+            - '&6is'
+            - '&6the'
+            - '&6lore'
+          enchantments:
+            - 'unbreaking:3'
+    messages:
+      - '&ctier completed!'
+      - '&cyou received these items!'
+
+storage:
+  type:
+    yaml: true
+    mysql: false
+    sqlite: false
+
+  mysql:
+    username: 'user'
+    password: 'pass'
+    host: 'localhost'
+    port: '3306'
+    dbname: 'seasons'
+    useSSL: 'false'
+
+
