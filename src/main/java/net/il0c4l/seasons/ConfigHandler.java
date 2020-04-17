@@ -135,7 +135,7 @@ public class ConfigHandler {
 
         String type = subSec.getString("type");
 
-        if(type.equalsIgnoreCase("commands")){
+        if(type.equalsIgnoreCase("command")){
             List<String> commands = subSec.getStringList("commands");
             reward = new CommandReward(commands);
         }

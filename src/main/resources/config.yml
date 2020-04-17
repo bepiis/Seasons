@@ -10,6 +10,13 @@ Challenges:
     message: 'Kill 3 pigs'
     gui_item: 'DIAMOND_BLOCK'
     weight: 0.10
+  2:
+    activationEvent: 'EntityDeath'
+    conditions: 'EntityType:COW.Material:DIAMOND_SWORD'
+    count: 2
+    message: 'kill 2 cows'
+    gui_item: 'GOLD_BLOCK'
+    weight: 0.20
 
 challenge_done_message: '&3Challenge completed: {MESSAGE}'
 
@@ -38,6 +45,30 @@ Tiers:
     messages:
       - '&ctier completed!'
       - '&cyou received these items!'
+  2:
+    title: '&3second tier'
+    guiItem: 'GOLD_BLOCK'
+    lore:
+      - '&6&lThis'
+      - 'is'
+      - 'the'
+      - 'second tier!'
+    rewards:
+      1:
+        type: 'item'
+        amount: 2
+        material: 'STONE'
+      2:
+        type: 'commmand'
+        commands:
+          - 'time day'
+          - 'gamemode 0 {PLAYER}'
+    messages:
+      - '&5Tier two completed!'
+      - 'yay'
+
+
+
 
 storage:
   type:
