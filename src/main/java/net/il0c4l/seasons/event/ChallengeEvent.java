@@ -18,6 +18,8 @@ public class ChallengeEvent extends Event {
         return handlers;
     }
 
+    public static HandlerList getHandlerList(){ return handlers; }
+
     private static final HandlerList handlers = new HandlerList();
 
     public void setCancelled(boolean cancel){
