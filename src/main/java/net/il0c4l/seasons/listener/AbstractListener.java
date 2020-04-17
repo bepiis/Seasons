@@ -31,25 +31,34 @@ public abstract class AbstractListener implements Listener {
 
     @EventHandler
     public void onChallengeCompleted(ChallengeCompletedEvent e){
+
+        plugin.sendMessage(e.getPlayer(), getChallengeCompletedMessage(e.getChallenge().getMessage()));
+
         ConfigHandler configHandler = plugin.getConfigHandler();
-        Entry entry = plugin.getDataHandler().getEntry(e.getPlayer().getUniqueId());
-        int points = entry.getPoints() + e.getEarned();
+        Entry entry = e.getEntry();
+        double points = entry.getPoints() + e.getChallenge().getPoints();
 
         if(points > configHandler.getTotalPoints()){
-            points = (int)configHandler.getTotalPoints();
+            points = configHandler.getTotalPoints();
             entry.setCompleted(true);
         }
 
         if(points - entry.getPoints() >= configHandler.getPointsPerTier()){
-            List<Tier> completed = configHandler.getCompletedTiers(points, entry.getPoints());
+            List<Tier> completed = configHandler.getCompletedTiers((int)points, (int)entry.getPoints());
+            sendToPlayer(e.getPlayer(), completed);
         }
-
         entry.setPoints(points);
     }
 
-    public void giveRewards(Player player, List<Tier> completed){
-        List<Reward> rewards = new ArrayList<>();
+    public void sendToPlayer(Player player, List<Tier> completed){
+        completed.forEach(iter -> {
+            iter.getMessages().forEach(subIterOne -> plugin.sendMessage(player, subIterOne));
+            iter.getRewards().forEach(subIterTwo -> subIterTwo.giveReward(player));
+        });
+    }
 
+    protected String getChallengeCompletedMessage(String msg){
+        return plugin.getConfigHandler().getChallengeCompletedMessage().replace("{MESSAGE}", msg);
     }
 
 }

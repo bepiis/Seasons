@@ -4,12 +4,14 @@ totalpoints: 10000
 
 Challenges:
   1:
-    challenge:
-      activationEvent: 'EntityDeath'
-      conditions: 'EntityType:PIG.Material:DIAMOND_SWORD'
-      count: 3
-      message: 'Kill 3 pigs'
-      gui_item: 'DIAMOND_BLOCK'
+    activationEvent: 'EntityDeath'
+    conditions: 'EntityType:PIG.Material:DIAMOND_SWORD'
+    count: 3
+    message: 'Kill 3 pigs'
+    gui_item: 'DIAMOND_BLOCK'
+    weight: 0.10
+
+challenge_done_message: '&3Challenge completed: {MESSAGE}'
 
 Tiers:
   1:
@@ -23,8 +25,8 @@ Tiers:
       1:
         type: 'item'
         amount: 1
+        material: 'DIAMOND_SWORD'
         meta:
-          type: 'DIAMOND_SWORD'
           display-name: 'A sword'
           lore:
             - '&6&lThis'

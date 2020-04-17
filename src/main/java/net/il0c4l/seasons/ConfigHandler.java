@@ -1,6 +1,7 @@
 package net.il0c4l.seasons;
 
 import net.il0c4l.seasons.exceptions.MissingPropertyException;
+import net.il0c4l.seasons.reward.CommandReward;
 import net.il0c4l.seasons.reward.ItemReward;
 import net.il0c4l.seasons.reward.Reward;
 import org.bukkit.Material;
@@ -8,45 +9,89 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ConfigHandler {
 
-
     private FileConfiguration config;
-    private static List<Challenge> availableChallenges;
+    private Logger logger;
     private List<Tier> tierList;
-    private final double totalPoints, pointsPerTier;
-    private String prefix;
+    private List<Challenge> availableChallenges;
+    private double totalPoints, pointsPerTier;
+    private String prefix, challengeCompletedMessage;
 
 
     public ConfigHandler(final Main plugin){
+        this.logger = plugin.getLogger();
         config = plugin.getConfig();
-
-        prefix = config.getString("prefix");
-
-        availableChallenges = buildChallengeList();
-        tierList = makeTierList();
-        totalPoints = config.getDouble("totalpoints");
+        parseConfig();
         pointsPerTier = totalPoints/tierList.size();
     }
 
-    public Challenge buildChallenge(ConfigurationSection section){
-        ConfigurationSection challengeSection = section.getConfigurationSection("challenge");
-        String activationEvent = challengeSection.getString("activationEvent");
-        String conditions = challengeSection.getString("conditions");
-        int count = challengeSection.getInt("count");
-        String message = challengeSection.getString("message");
-        String guiItem = challengeSection.getString("gui_item");
+    public final void parseConfig(){
+        prefix = config.getString("prefix");
+        totalPoints = config.getDouble("totalpoints");
+        challengeCompletedMessage = config.getString("challenge_done_message");
 
-        return new Challenge(activationEvent, conditions, count, message, guiItem);
+        availableChallenges = buildChallengeList();
+        tierList = makeTierList();
+    }
+
+    public Challenge buildChallenge(ConfigurationSection section) throws MissingPropertyException{
+        final String[] REQUIRED_ELEMENTS = {"activationEvent", "conditions", "count", "weight"};
+
+        //todo test control statements
+
+        String check = checkRequiredElements(section, REQUIRED_ELEMENTS);
+        if(!check.equals("")){
+            String path = section.getCurrentPath() + check;
+            logger.log(Level.SEVERE, INVALID_CONFIG);
+            throw new MissingPropertyException(Utils.missingProperty(path));
+        }
+
+        int count = section.getInt("count");
+        if(count <= 0){
+            count = 1;
+            section.set("count", 1);
+            logger.log(Level.WARNING,
+                    "The count specified in: " + section.getCurrentPath() + " must be greater than 0!" +
+                            "Defaulting this value to 1...");
+        }
+
+        double points = section.getInt("weight") * totalPoints;
+        if(points > totalPoints){
+            points = 0.10 * totalPoints;
+            section.set("weight", 0.10);
+            logger.log(Level.WARNING,
+                    "The weight specefied in: " + section.getCurrentPath() + " cannot be greater than 1!" +
+                            "Defaulting this value to 0.10...");
+        }
+
+        String activationEvent = section.getString("activationEvent");
+        String conditions = section.getString("conditions");
+
+        String guiItem = "STONE";
+        if(section.contains("gui_item"))
+            guiItem = section.getString("gui_item");
+
+        String message = "";
+        if(section.contains("message"))
+            message = section.getString("message");
+
+        return new Challenge(activationEvent, conditions, count, points, message, guiItem);
     }
 
     public List<Challenge> buildChallengeList(){
-        List<Challenge> challengeList = new ArrayList<Challenge>();
+        List<Challenge> challengeList = new ArrayList<>();
 
         for(String sec : config.getConfigurationSection("Challenges").getKeys(false)){
             ConfigurationSection subSec = config.getConfigurationSection("Challenges." + sec);
-            challengeList.add(buildChallenge(subSec));
+            try{
+                challengeList.add(buildChallenge(subSec));
+            } catch(MissingPropertyException e){
+                e.printStackTrace();
+            }
         }
         return challengeList;
     }
@@ -70,7 +115,7 @@ public class ConfigHandler {
         return null;
     }
 
-    public static List<Challenge> getAvailableChallenges(){
+    public List<Challenge> getAvailableChallenges(){
         return availableChallenges;
     }
 
@@ -84,23 +129,40 @@ public class ConfigHandler {
 
     protected Reward makeTierReward(ConfigurationSection subSec) throws MissingPropertyException {
         Reward reward = null;
+
         if(!subSec.contains("type"))
             throw new MissingPropertyException(Utils.missingProperty(subSec.getCurrentPath() + ".type"));
 
         String type = subSec.getString("type");
+
+        if(type.equalsIgnoreCase("commands")){
+            List<String> commands = subSec.getStringList("commands");
+            reward = new CommandReward(commands);
+        }
+
         if(type.equalsIgnoreCase("item")){
 
-            if(!subSec.contains("amount"))
-                throw new MissingPropertyException(Utils.missingProperty(subSec.getCurrentPath() + ".amount"));
+            final String[] REQUIRED_ELEMENTS = {"amount", "material"};
+
+            //todo check control statements
+
+            String check = checkRequiredElements(subSec, REQUIRED_ELEMENTS);
+            if(!check.equals("")){
+                String path = subSec.getCurrentPath() + check;
+                logger.log(Level.SEVERE, INVALID_CONFIG);
+                throw new MissingPropertyException(Utils.missingProperty(path));
+            }
 
             int amount = subSec.getInt("amount");
-            if(amount <= 0)
-                return null;
+            if(amount <= 0){
+                amount = 1;
+                subSec.set("amount", 1);
+                logger.log(Level.WARNING,
+                        "The amount specified in: " + subSec.getCurrentPath() + " must be greater than 0!" +
+                                "Defaulting this value to 1...");
+            }
 
-            if(!subSec.contains("meta.type"))
-                throw new MissingPropertyException(Utils.missingProperty(subSec.getCurrentPath() + ".meta.type"));
-
-            String subType = subSec.getString("meta.type");
+            String material = subSec.getString("material");
             String displayName = "";
 
             if(subSec.contains("meta.display-name"))
@@ -114,7 +176,7 @@ public class ConfigHandler {
             if(subSec.contains("meta.enchantments"))
                 enchants = subSec.getStringList("meta.enchantments");
 
-            reward = new ItemReward(Material.matchMaterial(subType), amount, displayName, lore, enchants);
+            reward = new ItemReward(Material.matchMaterial(material), amount, displayName, lore, enchants);
         }
         return reward;
     }
@@ -158,12 +220,19 @@ public class ConfigHandler {
         return tierList;
     }
 
-    public double getPointsPerTier(){
-        return pointsPerTier;
-    }
-
-    public double getTotalPoints(){
-        return totalPoints;
+    private String checkRequiredElements(ConfigurationSection sec, final String[] REQUIRED_ELEMENTS){
+        for(int i=0; i<REQUIRED_ELEMENTS.length; i++){
+            boolean found = false;
+            for(String key : sec.getKeys(true)) {
+                if(key.equalsIgnoreCase(REQUIRED_ELEMENTS[i])) {
+                    found = true;
+                }
+            }
+            if(!found){
+                return REQUIRED_ELEMENTS[i];
+            }
+        }
+        return "";
     }
 
     public List<Tier> getTierList(){
@@ -173,5 +242,19 @@ public class ConfigHandler {
     public String getPrefix(){
         return prefix;
     }
+
+    public double getTotalPoints(){
+        return totalPoints;
+    }
+
+    public double getPointsPerTier(){
+        return pointsPerTier;
+    }
+
+    public String getChallengeCompletedMessage(){
+        return challengeCompletedMessage;
+    }
+
+    private static final String INVALID_CONFIG = "There is something wrong in your configuration file!";
 
 }

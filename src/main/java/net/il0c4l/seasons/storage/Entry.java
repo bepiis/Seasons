@@ -6,7 +6,7 @@ import java.util.UUID;
 public class Entry {
 
     private UUID uuid;
-    private int points;
+    private double points;
     private boolean completed;
     private ArrayList<SubEntry> subEntries;
 
@@ -16,7 +16,7 @@ public class Entry {
         this.completed = false;
     }
 
-    public Entry(UUID uuid, ArrayList<SubEntry> subEntries, int points){
+    public Entry(UUID uuid, ArrayList<SubEntry> subEntries, double points){
         this.uuid = uuid;
         this.subEntries = subEntries;
         this.points = points;
@@ -32,11 +32,11 @@ public class Entry {
         return uuid;
     }
 
-    public int getPoints(){
+    public double getPoints(){
         return points;
     }
 
-    public void setPoints(int points){
+    public void setPoints(double points){
         this.points = points;
     }
 

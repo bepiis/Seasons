@@ -87,7 +87,7 @@ public class FlatDataHandler extends DataHandler {
                 continue;
             }
 
-            int points = data.getInt(activePath + ".points");
+            double points = data.getDouble(activePath + ".points");
             entries.add(new Entry(UUID.fromString(sec), subEntries, points));
 
             for(String subSec : data.getConfigurationSection(activePath).getKeys(false)){
@@ -113,7 +113,7 @@ public class FlatDataHandler extends DataHandler {
                     continue;
                 }
 
-                int points = data.getInt(activePath + ".points");
+                double points = data.getDouble(activePath + ".points");
                 entries.add(new Entry(UUID.fromString(sec), subEntries, points));
 
                 for(String subSec : data.getConfigurationSection(activePath + ".Active").getKeys(false)){

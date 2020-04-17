@@ -3,6 +3,7 @@ package net.il0c4l.seasons.listener;
 import net.il0c4l.seasons.Challenge;
 import net.il0c4l.seasons.ConfigHandler;
 import net.il0c4l.seasons.Main;
+import net.il0c4l.seasons.event.ChallengeCompletedEvent;
 import net.il0c4l.seasons.event.SEntityDeathEvent;
 import net.il0c4l.seasons.storage.DataHandler;
 import net.il0c4l.seasons.storage.Entry;
@@ -49,7 +50,7 @@ public class EntityDeathListener extends AbstractListener implements Listener {
         int progress = subEntry.getProgress();
         if(++progress == desired.getCount()){
             subEntry.setDone(true);
-            e.getPlayer().sendMessage("You've completed the challenge!");
+            call(new ChallengeCompletedEvent(e.getPlayer(), entry, desired));
         }
         subEntry.setProgress(progress);
         entry.updateSubEntry(subEntry);

@@ -11,7 +11,6 @@ public class Tier {
 
     public Tier(String title, List<String> lore, String guiItem, List<Reward> rewards, List<String> messages) {
         lore.forEach(Utils::chat);
-        messages.forEach(Utils::chat);
 
         this.rewards = rewards;
         this.title = Utils.chat(title);
