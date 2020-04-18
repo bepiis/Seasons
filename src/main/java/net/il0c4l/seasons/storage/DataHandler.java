@@ -5,6 +5,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.logging.Level;
 
 public abstract class DataHandler {
 
@@ -85,6 +86,10 @@ public abstract class DataHandler {
                 iter = entry;
             }
         });
+    }
+
+    public ArrayList<Entry> getEntries(){
+        return entries;
     }
 
     public void addSubEntry(Entry entry, SubEntry subEntry){

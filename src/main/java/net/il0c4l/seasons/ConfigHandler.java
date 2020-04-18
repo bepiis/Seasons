@@ -20,6 +20,7 @@ public class ConfigHandler {
     private List<Challenge> availableChallenges;
     private double totalPoints, pointsPerTier;
     private String prefix, challengeCompletedMessage;
+    private List<Double> ppt;
 
 
     public ConfigHandler(final Main plugin){
@@ -32,6 +33,7 @@ public class ConfigHandler {
     public final void parseConfig(){
         prefix = config.getString("prefix");
         totalPoints = config.getDouble("totalpoints");
+        ppt = getPointsPerTierL();
         challengeCompletedMessage = config.getString("challenge_done_message");
 
         availableChallenges = buildChallengeList();
@@ -59,7 +61,7 @@ public class ConfigHandler {
                             "Defaulting this value to 1...");
         }
 
-        double points = section.getInt("weight") * totalPoints;
+        double points = section.getDouble("weight") * totalPoints;
         if(points > totalPoints){
             points = 0.10 * totalPoints;
             section.set("weight", 0.10);
@@ -233,6 +235,17 @@ public class ConfigHandler {
             }
         }
         return "";
+    }
+
+    private List<Double> getPointsPerTierL(){
+        double ppt = totalPoints/config.getList("Tiers").size();
+        List<Double> pptl = new ArrayList<>();
+        double amt = 0.0;
+        for(Tier tier : tierList){
+            amt += ppt;
+            pptl.add(amt);
+        }
+        return pptl;
     }
 
     public List<Tier> getTierList(){

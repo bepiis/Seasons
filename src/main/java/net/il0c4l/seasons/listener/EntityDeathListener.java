@@ -15,8 +15,8 @@ import org.bukkit.event.entity.EntityDeathEvent;
 
 public class EntityDeathListener extends AbstractListener implements Listener {
 
-    private ConfigHandler configHandler;
-    private DataHandler storage;
+    private final ConfigHandler configHandler;
+    private final DataHandler storage;
 
     public EntityDeathListener(final Main plugin){
         super(plugin);
@@ -31,6 +31,7 @@ public class EntityDeathListener extends AbstractListener implements Listener {
         if(e.getEntity().getKiller() == null){
             return;
         }
+        e.getEntity().getKiller().sendMessage("test");
         Material tool = e.getEntity().getKiller().getInventory().getItemInMainHand().getType();
         call(new SEntityDeathEvent(e.getEntity().getKiller(), e.getEntityType(), tool));
     }
@@ -43,7 +44,7 @@ public class EntityDeathListener extends AbstractListener implements Listener {
 
         SubEntry subEntry = entry.getSubEntry(command);
 
-        if(desired == null || subEntry == null || subEntry.isDone() || !(desired.getCommand().equals(subEntry.getCommand()))){
+        if(subEntry == null || subEntry.isDone() || !(desired.getCommand().equals(subEntry.getCommand()))){
             return;
         }
 

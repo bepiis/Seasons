@@ -19,11 +19,6 @@ public final class SEntityDeathEvent extends ChallengeEvent {
         this.player = player;
     }
 
-    @Override
-    public HandlerList getHandlers(){
-        return handlers;
-    }
-
     public EntityType getEntityType(){
         return entityType;
     }
@@ -32,13 +27,4 @@ public final class SEntityDeathEvent extends ChallengeEvent {
         return tool;
     }
 
-    public static final HandlerList handlers = new HandlerList();
-
-    public void setCancelled(boolean cancel){
-        cancelled = cancel;
-    }
-
-    public boolean isCancelled(){
-        return cancelled;
-    }
 }

@@ -12,8 +12,8 @@ import org.bukkit.event.block.*;
 
 public class BlocksListener extends AbstractListener implements Listener{
 
-    private ConfigHandler challengeHandler;
-    private DataHandler storage;
+    private final ConfigHandler challengeHandler;
+    private final DataHandler storage;
 
     public BlocksListener(final Main plugin) {
         super(plugin);

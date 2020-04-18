@@ -1,6 +1,7 @@
 package net.il0c4l.seasons;
 
 import net.il0c4l.seasons.commands.SeasonsCommand;
+import net.il0c4l.seasons.listener.ChallengeListener;
 import net.il0c4l.seasons.listener.EntityDeathListener;
 import net.il0c4l.seasons.listener.PlayerLoginListener;
 import net.il0c4l.seasons.storage.*;
@@ -25,8 +26,10 @@ public class Main extends JavaPlugin {
         configHandler = new ConfigHandler(this);
         setStorageType();
         new EntityDeathListener(this);
-        new PlayerLoginListener(this, storage);
+        new PlayerLoginListener(this);
+        new ChallengeListener(this);
         new SeasonsCommand(this,"seadmin");
+
         aEntrySync();
     }
 

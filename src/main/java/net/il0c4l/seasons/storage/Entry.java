@@ -86,7 +86,7 @@ public class Entry {
     }
 
     public SubEntry getSubEntry(String command){
-        SubEntry subEntry = new SubEntry(uuid, "None", 0, false);
+        SubEntry subEntry = null;
         for(SubEntry subEntryIter : subEntries){
             if(subEntryIter.getCommand().equals(command)){
                 subEntry = subEntryIter;

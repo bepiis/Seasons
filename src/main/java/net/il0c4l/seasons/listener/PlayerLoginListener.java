@@ -10,22 +10,21 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
+
 public class PlayerLoginListener extends AbstractListener implements Listener {
 
-    private Main plugin;
-    private DataHandler storage;
+    private final DataHandler storage;
 
-    public PlayerLoginListener(Main plugin, DataHandler storage){
+    public PlayerLoginListener(final Main plugin){
         super(plugin);
-        this.plugin = plugin;
-        this.storage = storage;
+        storage = plugin.getDataHandler();
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e){
-        if(!plugin.getDataHandler().entryExists(e.getPlayer().getUniqueId())){
-            plugin.getDataHandler().addEntry(new Entry(e.getPlayer().getUniqueId()));
+        if(!storage.entryExists(e.getPlayer().getUniqueId())){
+            storage.addEntry(new Entry(e.getPlayer().getUniqueId()));
         }
     }
 
@@ -34,7 +33,6 @@ public class PlayerLoginListener extends AbstractListener implements Listener {
         try{
             UUID uuid = e.getPlayer().getUniqueId();
             storage.syncOneEntryAsync(storage.getEntry(uuid)).get();
-            storage.removeEntry(storage.getEntry(uuid));
         } catch(ExecutionException | InterruptedException ex){
             ex.printStackTrace();
         }

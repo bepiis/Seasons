@@ -88,12 +88,12 @@ public class FlatDataHandler extends DataHandler {
             }
 
             double points = data.getDouble(activePath + ".points");
-            entries.add(new Entry(UUID.fromString(sec), subEntries, points));
 
             for(String subSec : data.getConfigurationSection(activePath).getKeys(false)){
                 int progress = data.getInt(activePath + ".Active." + subSec);
                 subEntries.add(new SubEntry(UUID.fromString(sec), subSec, progress, false));
             }
+            entries.add(new Entry(UUID.fromString(sec), subEntries, points));
 
         }
         return entries;
@@ -106,7 +106,7 @@ public class FlatDataHandler extends DataHandler {
 
             for(String sec : data.getConfigurationSection("UUID").getKeys(false)){
                 ArrayList<SubEntry> subEntries = new ArrayList<>();
-                String activePath = "UUID" + sec;
+                String activePath = "UUID." + sec;
 
                 if(data.getBoolean(activePath + ".completed")){
                     entries.add(new Entry(UUID.fromString(sec), true));
@@ -114,12 +114,12 @@ public class FlatDataHandler extends DataHandler {
                 }
 
                 double points = data.getDouble(activePath + ".points");
-                entries.add(new Entry(UUID.fromString(sec), subEntries, points));
 
                 for(String subSec : data.getConfigurationSection(activePath + ".Active").getKeys(false)){
                     int progress = data.getInt(activePath + ".Active." + subSec);
                     subEntries.add(new SubEntry(UUID.fromString(sec), subSec.replace('-', '.'), progress, false));
                 }
+                entries.add(new Entry(UUID.fromString(sec), subEntries, points));
             }
             return entries;
         }, executor);
@@ -189,7 +189,7 @@ public class FlatDataHandler extends DataHandler {
                     String command = iter.getCommand().replace('.', '-');
                     data.set(path + ".Active." + command, iter.getProgress());
                 });
-                data.set(path + "points", entry.getPoints());
+                data.set(path + ".points", entry.getPoints());
             }
             saveEntries();
         }, executor);

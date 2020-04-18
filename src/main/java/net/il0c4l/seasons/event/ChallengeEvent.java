@@ -20,7 +20,7 @@ public class ChallengeEvent extends Event {
 
     public static HandlerList getHandlerList(){ return handlers; }
 
-    private static final HandlerList handlers = new HandlerList();
+    protected static final HandlerList handlers = new HandlerList();
 
     public void setCancelled(boolean cancel){
         cancelled = cancel;
