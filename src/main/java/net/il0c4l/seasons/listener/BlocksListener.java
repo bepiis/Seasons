@@ -10,7 +10,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 
-public class BlocksListener extends AbstractListener implements Listener {
+public class BlocksListener extends AbstractListener implements Listener{
 
     private ConfigHandler challengeHandler;
     private DataHandler storage;
