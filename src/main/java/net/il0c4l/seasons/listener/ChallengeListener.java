@@ -35,9 +35,8 @@ public class ChallengeListener extends AbstractListener implements Listener {
             entry.setCompleted(true);
         }
 
-
-        if(points - entry.getPoints() >= configHandler.getPointsPerTier()){
-            List<Tier> completed = configHandler.getCompletedTiers((int)points, (int)entry.getPoints());
+        List<Tier> completed = configHandler.getCompletedTiers((int)points, (int)entry.getPoints());
+        if(!completed.isEmpty()){
             sendToPlayer(e.getPlayer(), completed);
         }
         entry.setPoints(points);

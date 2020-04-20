@@ -33,11 +33,11 @@ public class ConfigHandler {
     public final void parseConfig(){
         prefix = config.getString("prefix");
         totalPoints = config.getDouble("totalpoints");
-        ppt = getPointsPerTierL();
         challengeCompletedMessage = config.getString("challenge_done_message");
 
         availableChallenges = buildChallengeList();
         tierList = makeTierList();
+        ppt = getPointsPerTier();
     }
 
     public Challenge buildChallenge(ConfigurationSection section) throws MissingPropertyException{
@@ -237,8 +237,8 @@ public class ConfigHandler {
         return "";
     }
 
-    private List<Double> getPointsPerTierL(){
-        double ppt = totalPoints/config.getList("Tiers").size();
+    private strictfp List<Double> getPointsPerTier(){
+        double ppt = totalPoints/tierList.size();
         List<Double> pptl = new ArrayList<>();
         double amt = 0.0;
         for(Tier tier : tierList){
@@ -260,8 +260,8 @@ public class ConfigHandler {
         return totalPoints;
     }
 
-    public double getPointsPerTier(){
-        return pointsPerTier;
+    public List<Double> getPPT(){
+        return ppt;
     }
 
     public String getChallengeCompletedMessage(){

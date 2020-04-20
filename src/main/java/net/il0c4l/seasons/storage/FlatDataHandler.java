@@ -17,12 +17,13 @@ import java.util.logging.Logger;
 
 public class FlatDataHandler extends DataHandler {
 
-    private final Main plugin;
-    private final Logger logger;
+    private final transient Main plugin;
+    private final transient Logger logger;
     private File file;
     private FileConfiguration data;
-    private Executor executor;
+    private transient Executor executor;
 
+    //todo make classes serializable (? implements ConfigurationSerializable)
 
     public FlatDataHandler(final Main plugin, String fileName){
         super(plugin);
@@ -86,6 +87,7 @@ public class FlatDataHandler extends DataHandler {
                 entries.add(new Entry(UUID.fromString(sec), true));
                 continue;
             }
+
 
             double points = data.getDouble(activePath + ".points");
 
