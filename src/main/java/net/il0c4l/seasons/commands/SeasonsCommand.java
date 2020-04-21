@@ -25,7 +25,7 @@ public class SeasonsCommand extends Command {
     public boolean execute(CommandSender commandSender, String s, String[] args){
         if(args[0].equalsIgnoreCase("setChallenge")){
             if(args.length != 4){
-                commandSender.sendMessage("Incorrect number of arguments. Expected 3, got " + args.length);
+                commandSender.sendMessage("Incorrect number of arguments. Expected 4, got " + args.length);
                 return false;
             }
             UUID uuid = Bukkit.getPlayer(args[1]).getUniqueId();

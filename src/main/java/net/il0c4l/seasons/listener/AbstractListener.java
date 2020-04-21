@@ -6,13 +6,13 @@ import net.il0c4l.seasons.Main;
 import net.il0c4l.seasons.Tier;
 import net.il0c4l.seasons.event.ChallengeCompletedEvent;
 import net.il0c4l.seasons.event.ChallengeEvent;
+import net.il0c4l.seasons.event.PointChangeEvent;
 import net.il0c4l.seasons.storage.DataHandler;
 import net.il0c4l.seasons.storage.Entry;
 import net.il0c4l.seasons.storage.SubEntry;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import java.util.List;
-
 
 public abstract class AbstractListener {
 
@@ -26,24 +26,29 @@ public abstract class AbstractListener {
         this.storage = plugin.getDataHandler();
     }
 
-    public void call(Event event){
-        plugin.getServer().getPluginManager().callEvent(event);
+    public static void call(Main plugin, Event e){
+        plugin.getServer().getPluginManager().callEvent(e);
     }
 
-    public void sendToPlayer(Player player, List<Tier> completed){
-        completed.forEach(iter -> {
-            iter.getMessages().forEach(subIterOne -> plugin.sendMessage(player, subIterOne));
-            iter.getRewards().forEach(subIterTwo -> subIterTwo.giveReward(player));
+    //for inherited classes
+    public void call(Event e){
+        plugin.getServer().getPluginManager().callEvent(e);
+    }
+
+    public void sendToPlayer(Player p, List<Tier> completed){
+        completed.forEach(it -> {
+            it.getMessages().forEach(subItOne -> plugin.sendMessage(p, subItOne));
+            it.getRewards().forEach(subItTwo -> subItTwo.giveReward(p));
         });
     }
 
-    protected String getChallengeCompletedMessage(String msg){
+    protected String getCompletedMessage(String msg){
         return plugin.getConfigHandler().getChallengeCompletedMessage().replace("{MESSAGE}", msg);
     }
 
-    public void checkChallenge(ChallengeEvent e, String command){
+    public void checkChallenge(Player p, String command){
         Challenge desired = configHandler.getDesiredChallenge(command);
-        Entry entry = storage.getEntry(e.getPlayer().getUniqueId());
+        Entry entry = storage.getEntry(p.getUniqueId());
 
         SubEntry subEntry = entry.getSubEntry(command);
 
@@ -54,7 +59,15 @@ public abstract class AbstractListener {
         int progress = subEntry.getProgress();
         if(++progress == desired.getCount()){
             subEntry.setDone(true);
-            call(new ChallengeCompletedEvent(e.getPlayer(), entry, desired));
+            plugin.sendMessage(p, getCompletedMessage(desired.getMessage()));
+            double points = entry.getPoints() + desired.getPoints();
+
+            if(points > configHandler.getTotalPoints()){
+                points = configHandler.getTotalPoints();
+                entry.setCompleted(true);
+            }
+
+            call(new PointChangeEvent(p, points, entry));
         }
         subEntry.setProgress(progress);
         entry.updateSubEntry(subEntry);

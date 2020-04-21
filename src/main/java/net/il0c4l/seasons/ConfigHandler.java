@@ -18,26 +18,24 @@ public class ConfigHandler {
     private Logger logger;
     private List<Tier> tierList;
     private List<Challenge> availableChallenges;
-    private double totalPoints, pointsPerTier;
+    private final double totalPoints, pointsPerTier;
     private String prefix, challengeCompletedMessage;
-    private List<Double> ppt;
-
 
     public ConfigHandler(final Main plugin){
         this.logger = plugin.getLogger();
         config = plugin.getConfig();
         parseConfig();
+        totalPoints = config.getDouble("totalpoints");
         pointsPerTier = totalPoints/tierList.size();
+
+
     }
 
     public final void parseConfig(){
         prefix = config.getString("prefix");
-        totalPoints = config.getDouble("totalpoints");
         challengeCompletedMessage = config.getString("challenge_done_message");
-
         availableChallenges = buildChallengeList();
         tierList = makeTierList();
-        ppt = getPointsPerTier();
     }
 
     public Challenge buildChallenge(ConfigurationSection section) throws MissingPropertyException{
@@ -239,17 +237,6 @@ public class ConfigHandler {
         return "";
     }
 
-    private strictfp List<Double> getPointsPerTier(){
-        double ppt = totalPoints/tierList.size();
-        List<Double> pptl = new ArrayList<>();
-        double amt = 0.0;
-        for(Tier tier : tierList){
-            amt += ppt;
-            pptl.add(amt);
-        }
-        return pptl;
-    }
-
     public List<Tier> getTierList(){
         return tierList;
     }
@@ -260,10 +247,6 @@ public class ConfigHandler {
 
     public double getTotalPoints(){
         return totalPoints;
-    }
-
-    public List<Double> getPPT(){
-        return ppt;
     }
 
     public String getChallengeCompletedMessage(){
