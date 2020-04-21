@@ -170,6 +170,8 @@ public class ConfigHandler {
             if(subSec.contains("meta.display-name"))
                 displayName = subSec.getString("meta.display-name");
 
+            logger.log(Level.INFO, displayName);
+
             List<String> lore = new ArrayList<>();
             if(subSec.contains("meta.lore"))
                 lore = subSec.getStringList("meta.lore");

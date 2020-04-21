@@ -59,7 +59,7 @@ Tiers:
         amount: 2
         material: 'STONE'
       2:
-        type: 'commmand'
+        type: 'command'
         commands:
           - 'time day'
           - 'gamemode 0 {PLAYER}'

@@ -11,12 +11,11 @@ public class Tier {
     private double pointsNeeded;
 
     public Tier(String title, List<String> lore, String guiItem, List<Reward> rewards, List<String> messages) {
-        lore.forEach(Utils::chat);
 
         this.rewards = rewards;
         this.title = Utils.chat(title);
         this.guiItem = guiItem;
-        this.lore = lore;
+        this.lore = Utils.chat(lore);
         this.messages = messages;
     }
 

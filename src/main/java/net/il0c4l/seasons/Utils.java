@@ -7,10 +7,20 @@ import org.bukkit.command.CommandMap;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Utils {
 
     public static String chat(String s) { return ChatColor.translateAlternateColorCodes('&', s); }
+
+    public static List<String> chat(List<String> s){
+        List<String> sLst = new ArrayList<>();
+        s.forEach(it -> {
+            sLst.add(chat(it));
+        });
+        return sLst;
+    }
 
     public static void registerCommand(Command command){
         try{

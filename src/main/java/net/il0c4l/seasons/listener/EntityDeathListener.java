@@ -39,22 +39,6 @@ public class EntityDeathListener extends AbstractListener implements Listener {
     @EventHandler
     public void onEntityDeathChallengeEvent(SEntityDeathEvent e){
         String command = "EntityDeath.EntityType:" + e.getEntityType().name() + ".Material:" + e.getTool().toString();
-        Challenge desired = configHandler.getDesiredChallenge(command);
-        Entry entry = storage.getEntry(e.getPlayer().getUniqueId());
-
-        SubEntry subEntry = entry.getSubEntry(command);
-
-        if(subEntry == null || subEntry.isDone() || !(desired.getCommand().equals(subEntry.getCommand()))){
-            return;
-        }
-
-        int progress = subEntry.getProgress();
-        if(++progress == desired.getCount()){
-            subEntry.setDone(true);
-            call(new ChallengeCompletedEvent(e.getPlayer(), entry, desired));
-        }
-        subEntry.setProgress(progress);
-        entry.updateSubEntry(subEntry);
-        storage.updateEntry(entry);
+        checkChallenge(e, command);
     }
 }
