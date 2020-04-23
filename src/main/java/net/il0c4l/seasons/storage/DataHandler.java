@@ -5,7 +5,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.logging.Level;
 
 public abstract class DataHandler {
 
@@ -31,22 +30,12 @@ public abstract class DataHandler {
         return "default";
     }
 
-
     public boolean entryExists(Entry entry) {
         return entries.contains(entry);
     }
 
     public boolean entryExists(UUID uuid){
-        for(Entry entry : entries){
-            if(entry.getUUID().equals(uuid)){
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public void removeEntry(Entry entry){
-        entries.remove(entry);
+        return entries.stream().anyMatch(match -> match.getUUID().equals(uuid));
     }
 
     public void addEntry(Entry entry){
@@ -54,56 +43,15 @@ public abstract class DataHandler {
     }
 
     public Entry getEntry(UUID uuid){
-        if(indexOfEntry(uuid) == -1){
-            return null;
-        }
-        return entries.get(indexOfEntry(uuid));
-    }
-
-    protected int indexOfEntry(UUID uuid){
-        int found = -1;
-        for(int i=0; i<entries.size(); i++){
-            if(entries.get(i).getUUID().equals(uuid)){
-                found = i;
-            }
-        }
-        return found;
-    }
-
-    protected int indexOfEntry(Entry entry){
-        int found = -1;
-        for(int i=0; i<entries.size(); i++){
-            if(entries.get(i).equals(entry)){
-                found = i;
-            }
-        }
-        return found;
+        return entries.stream().filter(match -> match.getUUID().equals(uuid)).findAny().orElse(null);
     }
 
     public void updateEntry(Entry entry){
-        entries.forEach(iter -> {
-            if(iter.equals(entry)){
-                iter = entry;
-            }
-        });
+        if(!entries.contains(entry)){
+            return;
+        }
+        entries.set(entries.indexOf(entry), entry);
     }
-
-    public ArrayList<Entry> getEntries(){
-        return entries;
-    }
-
-    public void addSubEntry(Entry entry, SubEntry subEntry){
-        entry.addSubEntry(subEntry);
-    }
-
-    public void removeSubEntry(Entry entry, SubEntry subEntry){
-        entry.removeSubEntry(subEntry);
-    }
-
-    public boolean subEntryExists(Entry entry, SubEntry subEntry){
-        return entry.indexOfSubEntry(subEntry) != -1;
-    }
-
 
 
     protected abstract ArrayList<Entry> getEntriesFromStorage();

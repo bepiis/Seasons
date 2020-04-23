@@ -1,10 +1,11 @@
 package net.il0c4l.seasons;
 
 import net.il0c4l.seasons.commands.SeasonsCommand;
-import net.il0c4l.seasons.listener.ChallengeListener;
+import net.il0c4l.seasons.listener.PointsListener;
 import net.il0c4l.seasons.listener.EntityDeathListener;
 import net.il0c4l.seasons.listener.PlayerLoginListener;
 import net.il0c4l.seasons.storage.*;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -24,12 +25,11 @@ public class Main extends JavaPlugin {
         saveDefaultConfig();
         executor = startExecutorService();
         configHandler = new ConfigHandler(this);
-        setStorageType();
+        storage = setStorageType();
         new EntityDeathListener(this);
         new PlayerLoginListener(this);
-        new ChallengeListener(this);
-        new SeasonsCommand(this,"seadmin");
-
+        new PointsListener(this);
+        new SeasonsCommand(this, "seadmin");
         aEntrySync();
     }
 
@@ -45,13 +45,13 @@ public class Main extends JavaPlugin {
         });
     }
 
-    public void setStorageType(){
+    public DataHandler setStorageType(){
         String type = DataHandler.getStorageType(getConfig()).toLowerCase();
+        DataHandler storage = null;
         switch(type){
             case "mysql":
                 Map<String, Object> creds = getConfig().getConfigurationSection("storage.mysql").getValues(false);
-                storage = new MySQLDataHandler(this, (String) creds.get("username"), (String) creds.get("password"), (String) creds.get("host"), (String) creds.get("port"), (String) creds.get("dbname"), (String) creds.get("useSSL"));
-                getLogger().log(Level.INFO, "CONNECTED");
+                storage =  new MySQLDataHandler(this, (String) creds.get("username"), (String) creds.get("password"), (String) creds.get("host"), (String) creds.get("port"), (String) creds.get("dbname"), (String) creds.get("useSSL"));
                 break;
             case "sqlite":
                 storage = new SQLiteDataHandler(this);
@@ -64,9 +64,9 @@ public class Main extends JavaPlugin {
                 getConfig().set("storage.yaml.type", true);
                 storage = new FlatDataHandler(this, "data.yml");
                 type = "yaml";
-                break;
         }
         getLogger().log(Level.INFO, "Set storage type to " + type);
+        return storage;
     }
 
     public Executor getThreadPool(){ return executor; }
@@ -95,11 +95,23 @@ public class Main extends JavaPlugin {
         executor.execute(() -> {
             while(isEnabled()) { run.run(); }
         });
-
     }
 
-    public void sendMessage(Player player, String message){
-        String prefix = getConfigHandler().getPrefix() + " ";
-        player.sendMessage(Utils.chat(prefix + message.replace("{PLAYER}", player.getName())));
+    public void sendMessage(CommandSender sender, Player player, String message){
+        StringBuilder builder  = new StringBuilder();
+        if(sender instanceof Player){
+            builder.append(getConfigHandler().getPrefix() + " ");
+        }
+        builder.append(message.replace("{PLAYER}", player.getName()));
+        sender.sendMessage(Utils.chat(builder.toString()));
+    }
+
+    public void sendMessage(CommandSender sender, String message){
+        StringBuilder builder = new StringBuilder();
+        if(sender instanceof Player){
+            builder.append(getConfigHandler().getPrefix() + " ");
+        }
+        builder.append(message);
+        sender.sendMessage(Utils.chat(builder.toString()));
     }
 }

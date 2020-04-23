@@ -4,22 +4,16 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
-import org.bukkit.entity.Player;
-
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Utils {
 
     public static String chat(String s) { return ChatColor.translateAlternateColorCodes('&', s); }
 
     public static List<String> chat(List<String> s){
-        List<String> sLst = new ArrayList<>();
-        s.forEach(it -> {
-            sLst.add(chat(it));
-        });
-        return sLst;
+        return s.stream().map(Utils::chat).collect(Collectors.toList());
     }
 
     public static void registerCommand(Command command){

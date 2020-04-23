@@ -110,7 +110,7 @@ public class FlatDataHandler extends DataHandler {
                 ArrayList<SubEntry> subEntries = new ArrayList<>();
                 String activePath = "UUID." + sec;
 
-                if(data.getBoolean(activePath + ".completed")){
+                if(data.getBoolean(activePath + ".complete")){
                     entries.add(new Entry(UUID.fromString(sec), true));
                     continue;
                 }

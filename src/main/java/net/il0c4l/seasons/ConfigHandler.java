@@ -8,7 +8,9 @@ import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,26 +20,22 @@ public class ConfigHandler {
     private Logger logger;
     private List<Tier> tierList;
     private List<Challenge> availableChallenges;
-    private double totalPoints, pointsPerTier;
+    private final double totalPoints, pointsPerTier;
     private String prefix, challengeCompletedMessage;
-    private List<Double> ppt;
-
 
     public ConfigHandler(final Main plugin){
         this.logger = plugin.getLogger();
         config = plugin.getConfig();
+        totalPoints = config.getDouble("totalpoints");
         parseConfig();
         pointsPerTier = totalPoints/tierList.size();
     }
 
     public final void parseConfig(){
         prefix = config.getString("prefix");
-        totalPoints = config.getDouble("totalpoints");
         challengeCompletedMessage = config.getString("challenge_done_message");
-
         availableChallenges = buildChallengeList();
         tierList = makeTierList();
-        ppt = getPointsPerTier();
     }
 
     public Challenge buildChallenge(ConfigurationSection section) throws MissingPropertyException{
@@ -99,7 +97,6 @@ public class ConfigHandler {
     }
 
     public boolean checkConditions(Challenge challenge, String command){
-
         if(command.contains(challenge.getActivationEvent())){
             if(command.contains(challenge.getCondition())){
                 return true;
@@ -108,13 +105,17 @@ public class ConfigHandler {
         return false;
     }
 
-    public Challenge getDesiredChallenge(String command){
+    public Challenge getDesiredChallengeL(String command){
         for(Challenge chal : availableChallenges){
             if(checkConditions(chal, command)){
                 return chal;
             }
         }
         return null;
+    }
+
+    public Challenge getDesiredChallenge(String command){
+        return availableChallenges.stream().filter(match -> checkConditions(match, command)).findAny().orElse(null);
     }
 
     public List<Challenge> getAvailableChallenges(){
@@ -170,8 +171,6 @@ public class ConfigHandler {
             if(subSec.contains("meta.display-name"))
                 displayName = subSec.getString("meta.display-name");
 
-            logger.log(Level.INFO, displayName);
-
             List<String> lore = new ArrayList<>();
             if(subSec.contains("meta.lore"))
                 lore = subSec.getStringList("meta.lore");
@@ -224,7 +223,7 @@ public class ConfigHandler {
         return tierList;
     }
 
-    private String checkRequiredElements(ConfigurationSection sec, final String[] REQUIRED_ELEMENTS){
+    private String checkRequiredElementsL(ConfigurationSection sec, final String[] REQUIRED_ELEMENTS){
         for(int i=0; i<REQUIRED_ELEMENTS.length; i++){
             boolean found = false;
             for(String key : sec.getKeys(true)) {
@@ -239,15 +238,10 @@ public class ConfigHandler {
         return "";
     }
 
-    private strictfp List<Double> getPointsPerTier(){
-        double ppt = totalPoints/tierList.size();
-        List<Double> pptl = new ArrayList<>();
-        double amt = 0.0;
-        for(Tier tier : tierList){
-            amt += ppt;
-            pptl.add(amt);
-        }
-        return pptl;
+    private String checkRequiredElements(ConfigurationSection sec, final String[] REQUIRED_ELEMENTS){
+        return Arrays.stream(REQUIRED_ELEMENTS).filter(match ->
+                sec.getKeys(true).stream().noneMatch(comp ->
+                        comp.equalsIgnoreCase(match))).findAny().orElse("");
     }
 
     public List<Tier> getTierList(){
@@ -260,10 +254,6 @@ public class ConfigHandler {
 
     public double getTotalPoints(){
         return totalPoints;
-    }
-
-    public List<Double> getPPT(){
-        return ppt;
     }
 
     public String getChallengeCompletedMessage(){

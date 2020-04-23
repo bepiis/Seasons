@@ -40,9 +40,6 @@ public class SubEntry extends Entry{
     }
 
     public boolean equals(SubEntry subEntry){
-        if(getUUID().toString().equals(subEntry.getUUID().toString()) && command.equals(subEntry.getCommand())){
-            return true;
-        }
-        return false;
+        return getUUID().toString().equals(subEntry.getUUID().toString()) && command.equals(subEntry.getCommand());
     }
 }
