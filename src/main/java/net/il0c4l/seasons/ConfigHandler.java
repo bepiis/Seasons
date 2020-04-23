@@ -24,11 +24,9 @@ public class ConfigHandler {
     public ConfigHandler(final Main plugin){
         this.logger = plugin.getLogger();
         config = plugin.getConfig();
-        parseConfig();
         totalPoints = config.getDouble("totalpoints");
+        parseConfig();
         pointsPerTier = totalPoints/tierList.size();
-
-
     }
 
     public final void parseConfig(){
@@ -167,8 +165,6 @@ public class ConfigHandler {
 
             if(subSec.contains("meta.display-name"))
                 displayName = subSec.getString("meta.display-name");
-
-            logger.log(Level.INFO, displayName);
 
             List<String> lore = new ArrayList<>();
             if(subSec.contains("meta.lore"))

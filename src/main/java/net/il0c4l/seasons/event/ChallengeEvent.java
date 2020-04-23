@@ -4,13 +4,15 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
+import java.util.UUID;
+
 public class ChallengeEvent extends Event {
 
-    private Player player;
+    private UUID uuid;
     private boolean cancelled;
 
-    public ChallengeEvent(Player player){
-        this.player = player;
+    public ChallengeEvent(UUID uuid){
+        this.uuid = uuid;
     }
 
     @Override
@@ -30,7 +32,7 @@ public class ChallengeEvent extends Event {
         return cancelled;
     }
 
-    public Player getPlayer(){
-        return player;
+    public UUID getUUID(){
+        return uuid;
     }
 }

@@ -5,6 +5,7 @@ import net.il0c4l.seasons.listener.PointsListener;
 import net.il0c4l.seasons.listener.EntityDeathListener;
 import net.il0c4l.seasons.listener.PlayerLoginListener;
 import net.il0c4l.seasons.storage.*;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -17,21 +18,18 @@ public class Main extends JavaPlugin {
     private static int T_NUM;
     private Executor executor;
     private ConfigHandler configHandler;
-    private final DataHandler storage;
-
-    public Main(){
-        storage = setStorageType();
-    }
+    private DataHandler storage;
 
     @Override
     public void onEnable(){
         saveDefaultConfig();
         executor = startExecutorService();
         configHandler = new ConfigHandler(this);
+        storage = setStorageType();
         new EntityDeathListener(this);
         new PlayerLoginListener(this);
         new PointsListener(this);
-        new SeasonsCommand(this,"seadmin");
+        new SeasonsCommand(this, "seadmin");
 
         aEntrySync();
     }
@@ -102,8 +100,21 @@ public class Main extends JavaPlugin {
 
     }
 
-    public void sendMessage(Player player, String message){
-        String prefix = getConfigHandler().getPrefix() + " ";
-        player.sendMessage(Utils.chat(prefix + message.replace("{PLAYER}", player.getName())));
+    public void sendMessage(CommandSender sender, Player player, String message){
+        StringBuilder builder  = new StringBuilder();
+        if(sender instanceof Player){
+            builder.append(getConfigHandler().getPrefix() + " ");
+        }
+        builder.append(message.replace("{PLAYER}", player.getName()));
+        sender.sendMessage(Utils.chat(builder.toString()));
+    }
+
+    public void sendMessage(CommandSender sender, String message){
+        StringBuilder builder = new StringBuilder();
+        if(sender instanceof Player){
+            builder.append(getConfigHandler().getPrefix() + " ");
+        }
+        builder.append(message);
+        sender.sendMessage(Utils.chat(builder.toString()));
     }
 }

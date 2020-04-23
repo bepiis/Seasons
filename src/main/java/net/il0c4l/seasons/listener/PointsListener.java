@@ -3,9 +3,8 @@ package net.il0c4l.seasons.listener;
 import net.il0c4l.seasons.ConfigHandler;
 import net.il0c4l.seasons.Main;
 import net.il0c4l.seasons.Tier;
-import net.il0c4l.seasons.event.ChallengeCompletedEvent;
 import net.il0c4l.seasons.event.PointChangeEvent;
-import net.il0c4l.seasons.storage.Entry;
+import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
@@ -27,7 +26,7 @@ public class PointsListener extends AbstractListener implements Listener {
 
         List<Tier> completed = configHandler.getCompletedTiers((int)e.getPoints(), (int)e.getPastPoints());
         if(!completed.isEmpty()){
-            sendToPlayer(e.getPlayer(), completed);
+            sendToPlayer(Bukkit.getPlayer(e.getUUID()), completed);
         }
         e.getEntry().setPoints(e.getPoints());
     }

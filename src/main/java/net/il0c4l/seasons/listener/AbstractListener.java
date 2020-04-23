@@ -4,8 +4,6 @@ import net.il0c4l.seasons.Challenge;
 import net.il0c4l.seasons.ConfigHandler;
 import net.il0c4l.seasons.Main;
 import net.il0c4l.seasons.Tier;
-import net.il0c4l.seasons.event.ChallengeCompletedEvent;
-import net.il0c4l.seasons.event.ChallengeEvent;
 import net.il0c4l.seasons.event.PointChangeEvent;
 import net.il0c4l.seasons.storage.DataHandler;
 import net.il0c4l.seasons.storage.Entry;
@@ -37,7 +35,7 @@ public abstract class AbstractListener {
 
     public void sendToPlayer(Player p, List<Tier> completed){
         completed.forEach(it -> {
-            it.getMessages().forEach(subItOne -> plugin.sendMessage(p, subItOne));
+            it.getMessages().forEach(subItOne -> plugin.sendMessage(p,p, subItOne));
             it.getRewards().forEach(subItTwo -> subItTwo.giveReward(p));
         });
     }
@@ -59,15 +57,14 @@ public abstract class AbstractListener {
         int progress = subEntry.getProgress();
         if(++progress == desired.getCount()){
             subEntry.setDone(true);
-            plugin.sendMessage(p, getCompletedMessage(desired.getMessage()));
+            plugin.sendMessage(p,p, getCompletedMessage(desired.getMessage()));
             double points = entry.getPoints() + desired.getPoints();
 
             if(points > configHandler.getTotalPoints()){
                 points = configHandler.getTotalPoints();
                 entry.setCompleted(true);
             }
-
-            call(new PointChangeEvent(p, points, entry));
+            call(new PointChangeEvent(p.getUniqueId(), points, entry));
         }
         subEntry.setProgress(progress);
         entry.updateSubEntry(subEntry);
