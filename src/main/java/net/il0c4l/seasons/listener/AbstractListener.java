@@ -58,13 +58,7 @@ public abstract class AbstractListener {
         if(++progress == desired.getCount()){
             subEntry.setDone(true);
             plugin.sendMessage(p,p, getCompletedMessage(desired.getMessage()));
-            double points = entry.getPoints() + desired.getPoints();
-
-            if(points > configHandler.getTotalPoints()){
-                points = configHandler.getTotalPoints();
-                entry.setCompleted(true);
-            }
-            call(new PointChangeEvent(p.getUniqueId(), points, entry));
+            call(new PointChangeEvent(p.getUniqueId(), entry.getPoints() + desired.getPoints(), entry));
         }
         subEntry.setProgress(progress);
         entry.updateSubEntry(subEntry);

@@ -54,46 +54,22 @@ public class Entry {
     }
 
     public boolean equals(Entry entry){
-        if(entry.getUUID().toString().equals(uuid.toString())){
-            return true;
-        }
-        return false;
+        return entry.getUUID().toString().equals(uuid.toString());
     }
 
     public void addSubEntry(SubEntry subEntry){
         subEntries.add(subEntry);
     }
 
-    public void removeSubEntry(SubEntry subEntry){
-        subEntries.remove(subEntry);
-    }
-
-    public int indexOfSubEntry(SubEntry subEntry){
-        int found = -1;
-        for(int i=0; i<subEntries.size(); i++){
-            if(subEntry.equals(subEntries.get(i))){
-                found = i;
-            }
-        }
-        return found;
-    }
-
     public void updateSubEntry(SubEntry subEntry){
-        subEntries.forEach(iter -> {
-            if(iter.equals(subEntry)){
-                iter = subEntry;
-            }
-        });
+        if(!subEntries.contains(subEntry)){
+            return;
+        }
+        subEntries.set(subEntries.indexOf(subEntry), subEntry);
     }
 
     public SubEntry getSubEntry(String command){
-        SubEntry subEntry = null;
-        for(SubEntry subEntryIter : subEntries){
-            if(subEntryIter.getCommand().equals(command)){
-                subEntry = subEntryIter;
-            }
-        }
-        return subEntry;
+        return subEntries.stream().filter(match -> match.getCommand().equals(command)).findAny().orElse(null);
     }
 
 }

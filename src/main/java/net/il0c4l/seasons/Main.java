@@ -30,7 +30,6 @@ public class Main extends JavaPlugin {
         new PlayerLoginListener(this);
         new PointsListener(this);
         new SeasonsCommand(this, "seadmin");
-
         aEntrySync();
     }
 
@@ -96,8 +95,6 @@ public class Main extends JavaPlugin {
         executor.execute(() -> {
             while(isEnabled()) { run.run(); }
         });
-
-
     }
 
     public void sendMessage(CommandSender sender, Player player, String message){

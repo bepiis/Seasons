@@ -9,8 +9,6 @@ import net.il0c4l.seasons.storage.SubEntry;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-
 import java.util.UUID;
 
 public class SeasonsCommand extends Command {
@@ -27,30 +25,6 @@ public class SeasonsCommand extends Command {
 
     @Override
     public boolean execute(CommandSender sender, String s, String[] args){
-        this.sender = sender;
-        this.args = args;
-        if(args[0].equalsIgnoreCase("setChallenge")){
-            if(args.length != 4){
-                sender.sendMessage("Incorrect number of arguments. Expected 4, got " + args.length);
-                return false;
-            }
-            UUID uuid = Bukkit.getPlayer(args[1]).getUniqueId();
-            String command = args[2];
-            int progress = Integer.parseInt(args[3]);
-            Entry entry;
-            if(!plugin.getDataHandler().entryExists(uuid)){
-                entry = new Entry(uuid);
-            } else{
-                entry = plugin.getDataHandler().getEntry(uuid);
-            }
-            entry.addSubEntry(new SubEntry(uuid, command, progress, false));
-            sender.sendMessage("Challenge set for " + Bukkit.getPlayer(uuid).toString());
-            return true;
-        }
-        return false;
-    }
-
-    public boolean executel(CommandSender sender, String s, String[] args){
         this.args = args;
         this.sender = sender;
         switch(args[0].toLowerCase()){
@@ -63,7 +37,7 @@ public class SeasonsCommand extends Command {
                     return false;
                 break;
             default:
-                plugin.sendMessage(sender, NOT_COMMAND);
+                plugin.sendMessage(sender, "I do not recognize this command.");
                 return false;
         }
         return true;
@@ -101,7 +75,7 @@ public class SeasonsCommand extends Command {
         }
 
         entry.addSubEntry(new SubEntry(uuid, command, progress, false));
-        plugin.sendMessage(sender, plugin.getServer().getPlayer(uuid), CHALLENGE_SET);
+        plugin.sendMessage(sender, plugin.getServer().getPlayer(uuid), "Challenge set for {PLAYER}.");
         return true;
     }
 
@@ -111,7 +85,12 @@ public class SeasonsCommand extends Command {
             return false;
         }
 
-        UUID uuid = UUID.fromString(args[1]);
+        double points = Double.parseDouble(args[2]);
+        if(points > plugin.getConfigHandler().getTotalPoints()){
+            plugin.sendMessage(sender, "Points set must be less than total points!");
+        }
+
+        UUID uuid = Bukkit.getPlayer(args[1]).getUniqueId();
 
         Entry entry;
         if(!plugin.getDataHandler().entryExists(uuid)){
@@ -120,15 +99,12 @@ public class SeasonsCommand extends Command {
             entry = plugin.getDataHandler().getEntry(uuid);
         }
 
-        double points = Double.parseDouble(args[2]);
-
         AbstractListener.call(plugin, new PointChangeEvent(uuid, points, entry));
+        plugin.sendMessage(sender, Bukkit.getPlayer(uuid), "Set {PLAYER}'s points to: " + points);
         return true;
     }
 
-    public static final String CHALLENGE_SET = "Challenge set for {PLAYER}";
     public static final String INCORRECT_NUM_ARGUMENTS = "Incorrect number of arguments.";
-    public static final String NOT_COMMAND = "I do not recognize this command!";
 
 }
 

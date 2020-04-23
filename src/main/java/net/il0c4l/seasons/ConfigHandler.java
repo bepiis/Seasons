@@ -8,7 +8,9 @@ import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -95,7 +97,6 @@ public class ConfigHandler {
     }
 
     public boolean checkConditions(Challenge challenge, String command){
-
         if(command.contains(challenge.getActivationEvent())){
             if(command.contains(challenge.getCondition())){
                 return true;
@@ -104,13 +105,17 @@ public class ConfigHandler {
         return false;
     }
 
-    public Challenge getDesiredChallenge(String command){
+    public Challenge getDesiredChallengeL(String command){
         for(Challenge chal : availableChallenges){
             if(checkConditions(chal, command)){
                 return chal;
             }
         }
         return null;
+    }
+
+    public Challenge getDesiredChallenge(String command){
+        return availableChallenges.stream().filter(match -> checkConditions(match, command)).findAny().orElse(null);
     }
 
     public List<Challenge> getAvailableChallenges(){
@@ -218,7 +223,7 @@ public class ConfigHandler {
         return tierList;
     }
 
-    private String checkRequiredElements(ConfigurationSection sec, final String[] REQUIRED_ELEMENTS){
+    private String checkRequiredElementsL(ConfigurationSection sec, final String[] REQUIRED_ELEMENTS){
         for(int i=0; i<REQUIRED_ELEMENTS.length; i++){
             boolean found = false;
             for(String key : sec.getKeys(true)) {
@@ -231,6 +236,12 @@ public class ConfigHandler {
             }
         }
         return "";
+    }
+
+    private String checkRequiredElements(ConfigurationSection sec, final String[] REQUIRED_ELEMENTS){
+        return Arrays.stream(REQUIRED_ELEMENTS).filter(match ->
+                sec.getKeys(true).stream().noneMatch(comp ->
+                        comp.equalsIgnoreCase(match))).findAny().orElse("");
     }
 
     public List<Tier> getTierList(){
