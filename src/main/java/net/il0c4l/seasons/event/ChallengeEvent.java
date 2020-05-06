@@ -1,38 +1,17 @@
 package net.il0c4l.seasons.event;
 
-import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
+import net.il0c4l.seasons.storage.Entry;
 
-import java.util.UUID;
+public class ChallengeEvent extends SeasonsEvent {
 
-public class ChallengeEvent extends Event {
+    private Entry entry;
 
-    private UUID uuid;
-    private boolean cancelled;
-
-    public ChallengeEvent(UUID uuid){
-        this.uuid = uuid;
+    public ChallengeEvent(Entry entry){
+        super(entry.getUUID());
+        this.entry = entry;
     }
 
-    @Override
-    public HandlerList getHandlers(){
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList(){ return handlers; }
-
-    protected static final HandlerList handlers = new HandlerList();
-
-    public void setCancelled(boolean cancel){
-        cancelled = cancel;
-    }
-
-    public boolean isCancelled(){
-        return cancelled;
-    }
-
-    public UUID getUUID(){
-        return uuid;
+    public Entry getEntry(){
+        return entry;
     }
 }

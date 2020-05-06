@@ -35,7 +35,7 @@ public abstract class AbstractListener {
 
     public void sendToPlayer(Player p, List<Tier> completed){
         completed.forEach(it -> {
-            it.getMessages().forEach(subItOne -> plugin.sendMessage(p,p, subItOne));
+            it.getMessages().forEach(subItOne -> plugin.sendMessage(p,p.getUniqueId(), subItOne));
             it.getRewards().forEach(subItTwo -> subItTwo.giveReward(p));
         });
     }
@@ -57,8 +57,8 @@ public abstract class AbstractListener {
         int progress = subEntry.getProgress();
         if(++progress == desired.getCount()){
             subEntry.setDone(true);
-            plugin.sendMessage(p,p, getCompletedMessage(desired.getMessage()));
-            call(new PointChangeEvent(p.getUniqueId(), entry.getPoints() + desired.getPoints(), entry));
+            plugin.sendMessage(p,p.getUniqueId(), getCompletedMessage(desired.getMessage()));
+            call(new PointChangeEvent(entry.getPoints() + desired.getPoints(), entry));
         }
         subEntry.setProgress(progress);
         entry.updateSubEntry(subEntry);

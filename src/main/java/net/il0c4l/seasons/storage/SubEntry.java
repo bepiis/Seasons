@@ -1,5 +1,7 @@
 package net.il0c4l.seasons.storage;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class SubEntry extends Entry{
@@ -13,6 +15,23 @@ public class SubEntry extends Entry{
         this.command = command;
         this.progress = progress;
         this.done = done;
+    }
+
+    public SubEntry(Map<String, Object> serialized, UUID uuid){
+        super(uuid);
+        this.command = (String) serialized.get("command");
+        this.progress = (int) serialized.get("progress");
+        this.done = false;
+    }
+
+    @Override
+    public Map<String, Object> serialize(){
+        HashMap<String, Object> serializer = new HashMap<>();
+
+        serializer.put("command", command);
+        serializer.put("progress", progress);
+
+        return serializer;
     }
 
     public String getCommand(){
@@ -39,7 +58,4 @@ public class SubEntry extends Entry{
         this.command = command;
     }
 
-    public boolean equals(SubEntry subEntry){
-        return getUUID().toString().equals(subEntry.getUUID().toString()) && command.equals(subEntry.getCommand());
-    }
 }

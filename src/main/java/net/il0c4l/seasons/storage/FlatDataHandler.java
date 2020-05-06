@@ -1,19 +1,17 @@
 package net.il0c4l.seasons.storage;
 
 import net.il0c4l.seasons.Main;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class FlatDataHandler extends DataHandler {
 
@@ -22,8 +20,6 @@ public class FlatDataHandler extends DataHandler {
     private File file;
     private FileConfiguration data;
     private transient Executor executor;
-
-    //todo make classes serializable (? implements ConfigurationSerializable)
 
     public FlatDataHandler(final Main plugin, String fileName){
         super(plugin);
@@ -40,22 +36,35 @@ public class FlatDataHandler extends DataHandler {
         } catch(InterruptedException | ExecutionException e){
             e.printStackTrace();
         }
-
     }
 
-    protected FileConfiguration returnFlatFile(String fileName){
-        file = new File(plugin.getDataFolder().getPath(), fileName);
-        if(!file.exists()){
-            logger.log(Level.INFO, NEW_FILE);
-            try{
-                file.createNewFile();
-                logger.log(Level.INFO, "Done.");
-            } catch(IOException e){
-                e.printStackTrace();
-                logger.log(Level.SEVERE, IO_ERROR);
-            }
-        }
-        return YamlConfiguration.loadConfiguration(file);
+    @Override
+    protected CompletableFuture<List<Entry>> getEntriesFromStorageAsync(){
+        return CompletableFuture.supplyAsync(() ->
+                data.getConfigurationSection("UUID").getKeys(false).stream().map(it ->
+                        (Entry) data.get("UUID." + it)).collect(Collectors.toList()), executor);
+    }
+
+    @Override
+    public void syncEntries(){
+        entries.forEach(it -> {
+            it.getActiveChallenges().removeIf(SubEntry::isDone);
+            data.set("UUID." + it.getUUID().toString(), it);
+        });
+        saveEntries();
+    }
+
+    @Override
+    public CompletableFuture<Void> syncOneEntryAsync(Entry entry){
+        return CompletableFuture.runAsync(() -> {
+            data.set("UUID." + entry.getUUID().toString(), entry);
+            saveEntries();
+        }, executor);
+    }
+
+    @Override
+    public CompletableFuture<Boolean> containsUUIDAsync(UUID uuid){
+        return CompletableFuture.supplyAsync(() -> data.contains("UUID." + uuid.toString()), executor);
     }
 
     protected CompletableFuture<FileConfiguration> returnFlatFileAsync(String fileName){
@@ -75,131 +84,12 @@ public class FlatDataHandler extends DataHandler {
         }, executor);
     }
 
-    @Override
-    protected ArrayList<Entry> getEntriesFromStorage() {
-        ArrayList<Entry> entries = new ArrayList<>();
-
-        for(String sec : data.getConfigurationSection("UUID").getKeys(false)){
-            ArrayList<SubEntry> subEntries = new ArrayList<>();
-            String activePath = "UUID." + sec;
-
-            if(data.getBoolean(activePath + ".completed")){
-                entries.add(new Entry(UUID.fromString(sec), true));
-                continue;
-            }
-
-
-            double points = data.getDouble(activePath + ".points");
-
-            for(String subSec : data.getConfigurationSection(activePath).getKeys(false)){
-                int progress = data.getInt(activePath + ".Active." + subSec);
-                subEntries.add(new SubEntry(UUID.fromString(sec), subSec, progress, false));
-            }
-            entries.add(new Entry(UUID.fromString(sec), subEntries, points));
-
-        }
-        return entries;
-    }
-
-    @Override
-    protected CompletableFuture<ArrayList<Entry>> getEntriesFromStorageAsync(){
-        return CompletableFuture.supplyAsync(() -> {
-            ArrayList<Entry> entries = new ArrayList<>();
-
-            for(String sec : data.getConfigurationSection("UUID").getKeys(false)){
-                ArrayList<SubEntry> subEntries = new ArrayList<>();
-                String activePath = "UUID." + sec;
-
-                if(data.getBoolean(activePath + ".complete")){
-                    entries.add(new Entry(UUID.fromString(sec), true));
-                    continue;
-                }
-
-                double points = data.getDouble(activePath + ".points");
-
-                for(String subSec : data.getConfigurationSection(activePath + ".Active").getKeys(false)){
-                    int progress = data.getInt(activePath + ".Active." + subSec);
-                    subEntries.add(new SubEntry(UUID.fromString(sec), subSec.replace('-', '.'), progress, false));
-                }
-                entries.add(new Entry(UUID.fromString(sec), subEntries, points));
-            }
-            return entries;
-        }, executor);
-    }
-
     public void saveEntries() {
         try{
             data.save(file);
         } catch(IOException e){
             logger.log(Level.SEVERE, IO_ERROR);
         }
-    }
-
-    public CompletableFuture<Void> saveEntriesAsync(){
-        return CompletableFuture.runAsync(() -> {
-            try{
-                data.save(file);
-            } catch(IOException e){
-                e.printStackTrace();
-            }
-        }, executor);
-    }
-
-    @Override
-    public void syncEntries(){
-        for(Entry entry : super.entries){
-            if(!data.contains("UUID." + entry.getUUID().toString())){
-                data.createSection("UUID." + entry.getUUID().toString() + ".Active");
-            }
-
-            ConfigurationSection sec = data.getConfigurationSection("UUID." + entry.getUUID().toString());
-
-            if(entry.isCompleted()){
-                sec.set("complete", true);
-                sec.set("Active", null);
-                continue;
-            }
-
-            sec.set("points", entry.getPoints());
-
-            Iterator<SubEntry> it = entry.getActiveChallenges().iterator();
-            while(it.hasNext()){
-                SubEntry subEntry = it.next();
-                String command = subEntry.getCommand().replace('.', '-');
-                if(subEntry.isDone()){
-                    sec.set("Active." + command, null);
-                    it.remove();
-                    continue;
-                }
-
-                sec.set("Active." + command, subEntry.getProgress());
-            }
-        }
-        saveEntries();
-    }
-
-    @Override
-    public CompletableFuture<Void> syncOneEntryAsync(Entry entry){
-        return CompletableFuture.runAsync(() -> {
-            String path = "UUID." + entry.getUUID().toString();
-
-            if(entry.isCompleted()){
-                data.set(path + ".complete", true);
-                data.set(path + ".Active", null);
-            } else {
-                entry.getActiveChallenges().forEach(iter -> {
-                    String command = iter.getCommand().replace('.', '-');
-                    data.set(path + ".Active." + command, iter.getProgress());
-                });
-                data.set(path + ".points", entry.getPoints());
-            }
-            saveEntries();
-        }, executor);
-    }
-
-    @Override
-    public CompletableFuture<Boolean> containsUUIDAsync(UUID uuid){
-        return CompletableFuture.supplyAsync(() -> data.contains("UUID." + uuid.toString()), executor);
     }
 
     private static final String NEW_FILE = "No flat storage file found! I'm going to try to create one for you...";

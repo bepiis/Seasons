@@ -1,15 +1,17 @@
 package net.il0c4l.seasons.storage;
 
 
-import java.util.ArrayList;
-import java.util.UUID;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
-public class Entry {
+import java.util.*;
+import java.util.stream.Collectors;
+
+public class Entry implements ConfigurationSerializable {
 
     private UUID uuid;
     private double points;
     private boolean completed;
-    private ArrayList<SubEntry> subEntries;
+    private List<SubEntry> subEntries;
 
     public Entry(UUID uuid){
         this.uuid = uuid;
@@ -17,7 +19,7 @@ public class Entry {
         this.completed = false;
     }
 
-    public Entry(UUID uuid, ArrayList<SubEntry> subEntries, double points){
+    public Entry(UUID uuid, List<SubEntry> subEntries, double points){
         this.uuid = uuid;
         this.subEntries = subEntries;
         this.points = points;
@@ -27,6 +29,31 @@ public class Entry {
     public Entry(UUID uuid, boolean completed){
         this.uuid = uuid;
         this.completed = completed;
+    }
+
+    public Entry(Map<String, Object> serialized){
+        this.points = (double) serialized.get("points");
+        this.completed = (boolean) serialized.get("completed");
+        this.uuid = UUID.fromString((String) serialized.get("uuid"));
+
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> mappedSubEntries = (List<Map<String, Object>>) serialized.get("subentries");
+
+        this.subEntries = mappedSubEntries.stream().map(it -> new SubEntry(it, uuid)).collect(Collectors.toList());
+    }
+
+    @Override
+    public Map<String, Object> serialize(){
+        HashMap<String, Object> serializer = new HashMap<>();
+
+        serializer.put("uuid", uuid.toString());
+        serializer.put("points", points);
+        serializer.put("completed", completed);
+
+
+        List<Map<String, Object>> serSubEntries = subEntries.stream().map(SubEntry::serialize).collect(Collectors.toList());
+        serializer.put("subentries", serSubEntries);
+        return serializer;
     }
 
     public UUID getUUID(){
@@ -41,7 +68,7 @@ public class Entry {
         this.points = points;
     }
 
-    public ArrayList<SubEntry> getActiveChallenges(){
+    public List<SubEntry> getActiveChallenges(){
         return subEntries;
     }
 
@@ -51,10 +78,6 @@ public class Entry {
 
     public void setCompleted(boolean complete){
         this.completed = complete;
-    }
-
-    public boolean equals(Entry entry){
-        return entry.getUUID().toString().equals(uuid.toString());
     }
 
     public void addSubEntry(SubEntry subEntry){

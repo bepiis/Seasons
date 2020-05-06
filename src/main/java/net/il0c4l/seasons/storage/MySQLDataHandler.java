@@ -4,6 +4,7 @@ import net.il0c4l.seasons.Main;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
@@ -101,7 +102,6 @@ public class MySQLDataHandler extends DataHandler {
         }, plugin.getThreadPool());
     }
 
-    @Override
     public ArrayList<Entry> getEntriesFromStorage() {
         ArrayList<Entry> entries = new ArrayList<>();
         openConnection();
@@ -125,7 +125,7 @@ public class MySQLDataHandler extends DataHandler {
     }
 
     @Override
-    public CompletableFuture<ArrayList<Entry>> getEntriesFromStorageAsync(){
+    public CompletableFuture<List<Entry>> getEntriesFromStorageAsync(){
         return null;
     }
 

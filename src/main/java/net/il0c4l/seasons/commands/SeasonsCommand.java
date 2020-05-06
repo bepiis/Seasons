@@ -1,14 +1,16 @@
 package net.il0c4l.seasons.commands;
 
+import net.il0c4l.seasons.Challenge;
 import net.il0c4l.seasons.Main;
 import net.il0c4l.seasons.Utils;
+import net.il0c4l.seasons.event.ChallengeSetEvent;
 import net.il0c4l.seasons.event.PointChangeEvent;
 import net.il0c4l.seasons.listener.AbstractListener;
 import net.il0c4l.seasons.storage.Entry;
-import net.il0c4l.seasons.storage.SubEntry;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+
 import java.util.UUID;
 
 public class SeasonsCommand extends Command {
@@ -34,6 +36,10 @@ public class SeasonsCommand extends Command {
                 break;
             case "setpoints":
                 if(!setPoints())
+                    return false;
+                break;
+            case "listchallenges":
+                if(!listChallenges())
                     return false;
                 break;
             default:
@@ -74,8 +80,7 @@ public class SeasonsCommand extends Command {
             entry = plugin.getDataHandler().getEntry(uuid);
         }
 
-        entry.addSubEntry(new SubEntry(uuid, command, progress, false));
-        plugin.sendMessage(sender, plugin.getServer().getPlayer(uuid), "Challenge set for {PLAYER}.");
+        AbstractListener.call(plugin, new ChallengeSetEvent(command, entry, progress, sender));
         return true;
     }
 
@@ -88,23 +93,48 @@ public class SeasonsCommand extends Command {
         double points = Double.parseDouble(args[2]);
         if(points > plugin.getConfigHandler().getTotalPoints()){
             plugin.sendMessage(sender, "Points set must be less than total points!");
+            return false;
         }
 
         UUID uuid = Bukkit.getPlayer(args[1]).getUniqueId();
 
-        Entry entry;
-        if(!plugin.getDataHandler().entryExists(uuid)){
-            entry = new Entry(uuid);
-        } else {
-            entry = plugin.getDataHandler().getEntry(uuid);
+        Entry entry = plugin.getDataHandler().getEntry(uuid);
+        if(entry == null){
+            plugin.sendMessage(sender, NO_RECORD(args[1]));
+            return false;
         }
 
-        AbstractListener.call(plugin, new PointChangeEvent(uuid, points, entry));
-        plugin.sendMessage(sender, Bukkit.getPlayer(uuid), "Set {PLAYER}'s points to: " + points);
+        AbstractListener.call(plugin, new PointChangeEvent(points, entry));
+        plugin.sendMessage(sender, uuid, "Set {PLAYER}'s points to: " + points);
+        return true;
+    }
+
+    public boolean listChallenges(){
+        if(args.length != 2){
+            plugin.sendMessage(sender, INCORRECT_NUM_ARGUMENTS);
+            return false;
+        }
+
+        UUID uuid = Bukkit.getPlayer(args[1]).getUniqueId();
+
+        Entry entry = plugin.getDataHandler().getEntry(uuid);
+        if(entry == null){
+            plugin.sendMessage(sender, NO_RECORD(args[1]));
+            return false;
+        } else if (entry.getActiveChallenges().isEmpty()){
+            plugin.sendMessage(sender, args[1] + " has no active challenges!");
+            return true;
+        }
+
+        entry.getActiveChallenges().forEach(it -> {
+            Challenge c = plugin.getConfigHandler().getDesiredChallenge(it.getCommand());
+            plugin.sendMessage(sender, entry.getActiveChallenges().indexOf(it) + ". " + c.getMessage());
+        });
         return true;
     }
 
     public static final String INCORRECT_NUM_ARGUMENTS = "Incorrect number of arguments.";
+    public static String NO_RECORD(String name){ return "I do not have a record of " + name + "!"; }
 
 }
 

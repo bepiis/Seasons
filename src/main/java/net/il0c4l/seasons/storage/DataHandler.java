@@ -3,6 +3,7 @@ package net.il0c4l.seasons.storage;
 import net.il0c4l.seasons.Main;
 import org.bukkit.configuration.file.FileConfiguration;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -11,7 +12,7 @@ public abstract class DataHandler {
     private Main plugin;
     private static final String[] DATA_TYPES = {"mysql", "yaml", "sqlite"};
 
-    protected ArrayList<Entry> entries;
+    protected List<Entry> entries;
 
     public DataHandler(final Main plugin){
         this.plugin = plugin;
@@ -28,10 +29,6 @@ public abstract class DataHandler {
             }
         }
         return "default";
-    }
-
-    public boolean entryExists(Entry entry) {
-        return entries.contains(entry);
     }
 
     public boolean entryExists(UUID uuid){
@@ -53,9 +50,7 @@ public abstract class DataHandler {
         entries.set(entries.indexOf(entry), entry);
     }
 
-
-    protected abstract ArrayList<Entry> getEntriesFromStorage();
-    protected abstract CompletableFuture<ArrayList<Entry>> getEntriesFromStorageAsync();
+    protected abstract CompletableFuture<List<Entry>> getEntriesFromStorageAsync();
     public abstract CompletableFuture<Boolean> containsUUIDAsync(UUID uuid);
     public abstract CompletableFuture<Void> syncOneEntryAsync(Entry entry);
     public abstract void syncEntries();

@@ -1,15 +1,19 @@
 package net.il0c4l.seasons;
 
 import net.il0c4l.seasons.commands.SeasonsCommand;
-import net.il0c4l.seasons.listener.PointsListener;
+import net.il0c4l.seasons.listener.EntryListener;
 import net.il0c4l.seasons.listener.EntityDeathListener;
 import net.il0c4l.seasons.listener.PlayerLoginListener;
 import net.il0c4l.seasons.storage.*;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.Arrays;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.logging.Level;
 
@@ -24,11 +28,12 @@ public class Main extends JavaPlugin {
     public void onEnable(){
         saveDefaultConfig();
         executor = startExecutorService();
+        registerSerializable();
         configHandler = new ConfigHandler(this);
         storage = setStorageType();
         new EntityDeathListener(this);
         new PlayerLoginListener(this);
-        new PointsListener(this);
+        new EntryListener(this);
         new SeasonsCommand(this, "seadmin");
         aEntrySync();
     }
@@ -36,6 +41,11 @@ public class Main extends JavaPlugin {
     @Override
     public void onDisable(){
 
+    }
+
+    private void registerSerializable(){
+        final Class[] serializable = {Entry.class, SubEntry.class};
+        Arrays.stream(serializable).forEach(ConfigurationSerialization::registerClass);
     }
 
     public Executor startExecutorService(){
@@ -97,19 +107,19 @@ public class Main extends JavaPlugin {
         });
     }
 
-    public void sendMessage(CommandSender sender, Player player, String message){
+    public void sendMessage(CommandSender sender, UUID uuid, String message){
         StringBuilder builder  = new StringBuilder();
         if(sender instanceof Player){
-            builder.append(getConfigHandler().getPrefix() + " ");
+            builder.append(getConfigHandler().getPrefix()).append(" ");
         }
-        builder.append(message.replace("{PLAYER}", player.getName()));
+        builder.append(message.replace("{PLAYER}", Bukkit.getPlayer(uuid).getName()));
         sender.sendMessage(Utils.chat(builder.toString()));
     }
 
     public void sendMessage(CommandSender sender, String message){
         StringBuilder builder = new StringBuilder();
         if(sender instanceof Player){
-            builder.append(getConfigHandler().getPrefix() + " ");
+            builder.append(getConfigHandler().getPrefix()).append(" ");
         }
         builder.append(message);
         sender.sendMessage(Utils.chat(builder.toString()));

@@ -3,6 +3,7 @@ package net.il0c4l.seasons.storage;
 import net.il0c4l.seasons.Main;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -15,7 +16,6 @@ public class SQLiteDataHandler extends DataHandler {
         this.plugin = plugin;
     }
 
-    @Override
     protected ArrayList<Entry> getEntriesFromStorage() {
         return null;
     }
@@ -26,7 +26,7 @@ public class SQLiteDataHandler extends DataHandler {
     }
 
     @Override
-    public CompletableFuture<ArrayList<Entry>> getEntriesFromStorageAsync(){
+    public CompletableFuture<List<Entry>> getEntriesFromStorageAsync(){
         return null;
     }
 

@@ -18,30 +18,6 @@ public class Challenge {
         this.points = points;
     }
 
-    public boolean isRewardType(String rewardType){
-        int check = 0;
-        for(int i=0; i<VALID_REWARD_TYPES.length; i++){
-            if(rewardType.equals(VALID_REWARD_TYPES[i])){
-                check++;
-            }
-        }
-        if(check != 1){
-            return false;
-        } return true;
-    }
-
-    public boolean isChallengeType(String challengeType){
-        int check = 0;
-        for(int i = 0; i< VALID_CHALLENGE_TYPES.length; i++){
-            if(challengeType.equals(VALID_CHALLENGE_TYPES[i])) {
-                check++;
-            }
-        }
-        if(check != 1){
-            return false;
-        } return true;
-    }
-
     public String getActivationEvent(){
         return activationEvent;
     }

@@ -10,7 +10,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -105,21 +104,8 @@ public class ConfigHandler {
         return false;
     }
 
-    public Challenge getDesiredChallengeL(String command){
-        for(Challenge chal : availableChallenges){
-            if(checkConditions(chal, command)){
-                return chal;
-            }
-        }
-        return null;
-    }
-
     public Challenge getDesiredChallenge(String command){
         return availableChallenges.stream().filter(match -> checkConditions(match, command)).findAny().orElse(null);
-    }
-
-    public List<Challenge> getAvailableChallenges(){
-        return availableChallenges;
     }
 
     public List<Tier> getCompletedTiers(int points, int pastPoints){
@@ -223,29 +209,14 @@ public class ConfigHandler {
         return tierList;
     }
 
-    private String checkRequiredElementsL(ConfigurationSection sec, final String[] REQUIRED_ELEMENTS){
-        for(int i=0; i<REQUIRED_ELEMENTS.length; i++){
-            boolean found = false;
-            for(String key : sec.getKeys(true)) {
-                if(key.equalsIgnoreCase(REQUIRED_ELEMENTS[i])) {
-                    found = true;
-                }
-            }
-            if(!found){
-                return REQUIRED_ELEMENTS[i];
-            }
-        }
-        return "";
-    }
-
     private String checkRequiredElements(ConfigurationSection sec, final String[] REQUIRED_ELEMENTS){
         return Arrays.stream(REQUIRED_ELEMENTS).filter(match ->
                 sec.getKeys(true).stream().noneMatch(comp ->
                         comp.equalsIgnoreCase(match))).findAny().orElse("");
     }
 
-    public List<Tier> getTierList(){
-        return tierList;
+    public List<Challenge> getAvailableChallenges(){
+        return availableChallenges;
     }
 
     public String getPrefix(){
