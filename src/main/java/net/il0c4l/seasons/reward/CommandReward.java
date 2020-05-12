@@ -25,8 +25,8 @@ public final class CommandReward implements Reward {
         Server server = Bukkit.getServer();
         CommandSender sender = Bukkit.getConsoleSender();
 
-        commands.forEach(iter -> {
-            String updated = iter.replace("{PLAYER}", player.getName());
+        commands.forEach(it -> {
+            String updated = it.replace("{PLAYER}", player.getName());
             server.dispatchCommand(sender, Utils.chat(updated));
         });
     }

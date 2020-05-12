@@ -50,7 +50,6 @@ public class EntryListener extends AbstractListener implements Listener {
         } else{
             msg = "Challenge is already set for {PLAYER}!";
         }
-
         if(e.setFromCommand()){
             plugin.sendMessage(e.getSender(), e.getUUID(), msg);
         }

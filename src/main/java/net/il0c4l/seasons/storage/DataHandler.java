@@ -3,6 +3,7 @@ package net.il0c4l.seasons.storage;
 import net.il0c4l.seasons.Main;
 import org.bukkit.configuration.file.FileConfiguration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -29,6 +30,10 @@ public abstract class DataHandler {
             }
         }
         return "default";
+    }
+
+    public static String getStorageTypeL(FileConfiguration config){
+        return config.getConfigurationSection("storage.type").getKeys(false).stream().filter(it -> Arrays.stream(DATA_TYPES).anyMatch(itr -> itr.equalsIgnoreCase(it))).findAny().orElse("default");
     }
 
     public boolean entryExists(UUID uuid){

@@ -15,11 +15,11 @@ import java.util.stream.Collectors;
 
 public class FlatDataHandler extends DataHandler {
 
-    private final transient Main plugin;
-    private final transient Logger logger;
+    private final Main plugin;
+    private final Logger logger;
     private File file;
     private FileConfiguration data;
-    private transient Executor executor;
+    private Executor executor;
 
     public FlatDataHandler(final Main plugin, String fileName){
         super(plugin);

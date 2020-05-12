@@ -42,6 +42,10 @@ public class SeasonsCommand extends Command {
                 if(!listChallenges())
                     return false;
                 break;
+            case "removechallenge":
+                if(!removeChallenge())
+                    return false;
+                break;
             default:
                 plugin.sendMessage(sender, "I do not recognize this command.");
                 return false;
@@ -99,8 +103,7 @@ public class SeasonsCommand extends Command {
         UUID uuid = Bukkit.getPlayer(args[1]).getUniqueId();
 
         Entry entry = plugin.getDataHandler().getEntry(uuid);
-        if(entry == null){
-            plugin.sendMessage(sender, NO_RECORD(args[1]));
+        if(!checkEntry(entry, args[1])){
             return false;
         }
 
@@ -118,8 +121,7 @@ public class SeasonsCommand extends Command {
         UUID uuid = Bukkit.getPlayer(args[1]).getUniqueId();
 
         Entry entry = plugin.getDataHandler().getEntry(uuid);
-        if(entry == null){
-            plugin.sendMessage(sender, NO_RECORD(args[1]));
+        if(!checkEntry(entry, args[1])){
             return false;
         } else if (entry.getActiveChallenges().isEmpty()){
             plugin.sendMessage(sender, args[1] + " has no active challenges!");
@@ -133,8 +135,39 @@ public class SeasonsCommand extends Command {
         return true;
     }
 
+    public boolean removeChallenge(){
+        if(args.length < 3){
+            plugin.sendMessage(sender, INCORRECT_NUM_ARGUMENTS);
+            return false;
+        }
+
+        UUID uuid = Bukkit.getPlayer(args[1]).getUniqueId();
+
+        Entry entry = plugin.getDataHandler().getEntry(uuid);
+        if(!checkEntry(entry, args[2])){
+            return false;
+        }
+
+        if(entry.getActiveChallenges().stream().anyMatch(it -> it.getCommand().equalsIgnoreCase(args[2]))){
+            entry.getActiveChallenges().remove(entry.getSubEntry(args[2]));
+            plugin.sendMessage(sender, "Challenge removed!");
+            return true;
+        }
+
+        plugin.sendMessage(sender, uuid, "{PLAYER} does not have " + args[2] + " set!");
+        return false;
+    }
+
     public static final String INCORRECT_NUM_ARGUMENTS = "Incorrect number of arguments.";
     public static String NO_RECORD(String name){ return "I do not have a record of " + name + "!"; }
+
+    public boolean checkEntry(Entry entry, String name){
+        if(entry == null){
+            plugin.sendMessage(sender, "I do not have any record of " + name + "!");
+            return false;
+        }
+        return true;
+    }
 
 }
 
