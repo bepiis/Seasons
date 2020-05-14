@@ -67,9 +67,6 @@ Tiers:
       - '&5Tier two completed!'
       - 'yay'
 
-
-
-
 storage:
   type:
     yaml: true

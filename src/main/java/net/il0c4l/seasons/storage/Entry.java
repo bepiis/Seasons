@@ -91,7 +91,7 @@ public class Entry implements ConfigurationSerializable {
         subEntries.set(subEntries.indexOf(subEntry), subEntry);
     }
 
-    public SubEntry getSubEntry(String command){
+    public SubEntry getSubEntry(String command) {
         return subEntries.stream().filter(match -> match.getCommand().equals(command)).findAny().orElse(null);
     }
 
