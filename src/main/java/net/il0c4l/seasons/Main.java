@@ -1,6 +1,7 @@
 package net.il0c4l.seasons;
 
 import net.il0c4l.seasons.commands.SeasonsCommand;
+import net.il0c4l.seasons.gui.GUI;
 import net.il0c4l.seasons.listener.EntryListener;
 import net.il0c4l.seasons.listener.EntityDeathListener;
 import net.il0c4l.seasons.listener.PlayerLoginListener;
@@ -27,6 +28,7 @@ public class Main extends JavaPlugin {
     private Executor executor;
     private ConfigHandler configHandler;
     private DataHandler storage;
+    private GUI gui;
 
     @Override
     public void onEnable(){
@@ -39,12 +41,17 @@ public class Main extends JavaPlugin {
         new PlayerLoginListener(this);
         new EntryListener(this);
         new SeasonsCommand(this, "seadmin");
+        gui = new GUI(this);
         aEntrySync();
     }
 
     @Override
     public void onDisable(){
 
+    }
+
+    public GUI getGui(){
+        return gui;
     }
 
     private void registerSerializable(){

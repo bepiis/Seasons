@@ -1,6 +1,7 @@
 package net.il0c4l.seasons.storage;
 
 
+import net.il0c4l.seasons.Tier;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
 import java.util.*;

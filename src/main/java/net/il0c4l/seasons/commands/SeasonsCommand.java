@@ -11,6 +11,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
+
 import java.util.UUID;
 
 public class SeasonsCommand extends Command {
@@ -44,6 +45,10 @@ public class SeasonsCommand extends Command {
                 break;
             case "removechallenge":
                 if(!removeChallenge())
+                    return false;
+                break;
+            case "open":
+                if(!openGui())
                     return false;
                 break;
             default:
@@ -157,6 +162,12 @@ public class SeasonsCommand extends Command {
         plugin.sendMessage(sender, uuid, "{PLAYER} does not have " + args[2] + " set!");
         return false;
     }
+
+    public boolean openGui(){
+        plugin.getGui().getGui().show(Bukkit.getPlayer(args[1]));
+        return true;
+    }
+
 
     public static final String INCORRECT_NUM_ARGUMENTS = "Incorrect number of arguments.";
     public static String NO_RECORD(String name){ return "I do not have a record of " + name + "!"; }

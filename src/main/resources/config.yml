@@ -67,6 +67,15 @@ Tiers:
       - '&5Tier two completed!'
       - 'yay'
 
+gui:
+  next: 'ARROW'
+  previous: 'ARROW'
+  first: 'SIGN'
+  last: 'SIGN'
+  progressbar:
+    notfinished: 'LIGHT_GRAY_STAINED_GLASS_PANE'
+    finished: 'LIGHT_GREEN_STAINED_GLASS_PANE'
+
 storage:
   type:
     yaml: true

@@ -215,6 +215,12 @@ public class ConfigHandler {
                         comp.equalsIgnoreCase(match))).findAny().orElse("");
     }
 
+    public static double getProgress(double points, double totalPoints){
+        return points/totalPoints;
+    }
+
+    public List<Tier> getTierList() { return tierList; }
+
     public List<Challenge> getAvailableChallenges(){
         return availableChallenges;
     }
@@ -226,6 +232,8 @@ public class ConfigHandler {
     public double getTotalPoints(){
         return totalPoints;
     }
+
+    public double getPointsPerTier() { return pointsPerTier; }
 
     public String getChallengeCompletedMessage(){
         return challengeCompletedMessage;
