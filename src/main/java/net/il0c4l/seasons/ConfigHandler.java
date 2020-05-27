@@ -7,9 +7,12 @@ import net.il0c4l.seasons.reward.Reward;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import org.bukkit.inventory.ItemStack;
+
+import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,25 +20,55 @@ public class ConfigHandler {
 
     private FileConfiguration config;
     private Logger logger;
-    private List<Tier> tierList;
     private List<Challenge> availableChallenges;
-    private final double totalPoints, pointsPerTier;
     private String prefix, challengeCompletedMessage;
+
+    private static double pointsPerTier;
+
+    public static double totalPoints;
+    public static List<Tier> tierList;
+    public static final Map<String, ItemStack> progBarMats = new HashMap<>();
 
     public ConfigHandler(final Main plugin){
         this.logger = plugin.getLogger();
         config = plugin.getConfig();
-        totalPoints = config.getDouble("totalpoints");
-        parseConfig();
-        pointsPerTier = totalPoints/tierList.size();
-    }
 
-    public final void parseConfig(){
-        prefix = config.getString("prefix");
+        totalPoints = config.getDouble("totalpoints");
         challengeCompletedMessage = config.getString("challenge_done_message");
+        prefix = config.getString("prefix");
         availableChallenges = buildChallengeList();
         tierList = makeTierList();
+        pointsPerTier = totalPoints/tierList.size();
+
+        ConfigurationSection sec = config.getConfigurationSection("gui");
+        for(String key : sec.getKeys(false)){
+            if(key.equalsIgnoreCase("progressbar")){
+                sec.getConfigurationSection("progressbar").getKeys(false).forEach(it ->
+                        progBarMats.put(it, new ItemStack(Material.valueOf(sec.getString("progressbar." + it)))));
+                continue;
+            }
+            progBarMats.put(key, new ItemStack(Material.valueOf(sec.getString(key))));
+        }
     }
+
+    public boolean checkRequiredElements() throws MissingPropertyException {
+        String missing = "Missing path from config: ";
+
+        if(!config.contains("prefix")){
+            logger.log(Level.WARNING, missing + "prefix. " + "I will add a default for you...");
+            config.set("prefix", "&8[&6&lSeasons&8]");
+        }
+
+        final String[] REQUIRED_ELEMENTS = {"totalpoints", "tiers", "gui", "storage"};
+
+        for(String required : REQUIRED_ELEMENTS){
+            if(!config.contains(required)) throw new MissingPropertyException(missing + required);
+        }
+
+
+        return false;
+    }
+
 
     public Challenge buildChallenge(ConfigurationSection section) throws MissingPropertyException{
         final String[] REQUIRED_ELEMENTS = {"activationEvent", "conditions", "count", "weight"};
@@ -108,7 +141,7 @@ public class ConfigHandler {
         return availableChallenges.stream().filter(match -> checkConditions(match, command)).findAny().orElse(null);
     }
 
-    public List<Tier> getCompletedTiers(int points, int pastPoints){
+    public static List<Tier> getCompletedTiers(int points, int pastPoints){
         List<Tier> completed = new ArrayList<>();
         for(int i=pastPoints/(int)pointsPerTier; i<points/(int)pointsPerTier; i++){
             completed.add(tierList.get(i));
@@ -215,15 +248,9 @@ public class ConfigHandler {
                         comp.equalsIgnoreCase(match))).findAny().orElse("");
     }
 
-    public static double getProgress(double points, double totalPoints){
-        return points/totalPoints;
-    }
+
 
     public List<Tier> getTierList() { return tierList; }
-
-    public List<Challenge> getAvailableChallenges(){
-        return availableChallenges;
-    }
 
     public String getPrefix(){
         return prefix;
@@ -232,8 +259,6 @@ public class ConfigHandler {
     public double getTotalPoints(){
         return totalPoints;
     }
-
-    public double getPointsPerTier() { return pointsPerTier; }
 
     public String getChallengeCompletedMessage(){
         return challengeCompletedMessage;

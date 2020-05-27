@@ -24,21 +24,21 @@ public class EntryListener extends AbstractListener implements Listener {
 
     @EventHandler
     public void onPointChange(PointChangeEvent e){
-        ConfigHandler configHandler = plugin.getConfigHandler();
-
         double points = e.getPoints();
 
         if(points > e.getPastPoints()){
-            if(points > configHandler.getTotalPoints()){
-                points = configHandler.getTotalPoints();
+            if(points > ConfigHandler.totalPoints){
+                points = ConfigHandler.totalPoints;
                 e.getEntry().setCompleted(true);
             }
-            List<Tier> completed = configHandler.getCompletedTiers((int)points, (int)e.getPastPoints());
+            List<Tier> completed = ConfigHandler.getCompletedTiers((int)points, (int)e.getPastPoints());
             if(!completed.isEmpty()){
                 sendToPlayer(Bukkit.getPlayer(e.getUUID()), completed);
             }
         }
         e.getEntry().setPoints(points);
+        plugin.getGui().updateProgBar(e.getEntry());
+        plugin.getDataHandler().syncOneEntryAsync(e.getEntry());
     }
 
     @EventHandler

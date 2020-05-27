@@ -108,7 +108,7 @@ public class SeasonsCommand extends Command {
         UUID uuid = Bukkit.getPlayer(args[1]).getUniqueId();
 
         Entry entry = plugin.getDataHandler().getEntry(uuid);
-        if(!checkEntry(entry, args[1])){
+        if(checkEntry(entry, args[1])){
             return false;
         }
 
@@ -126,7 +126,7 @@ public class SeasonsCommand extends Command {
         UUID uuid = Bukkit.getPlayer(args[1]).getUniqueId();
 
         Entry entry = plugin.getDataHandler().getEntry(uuid);
-        if(!checkEntry(entry, args[1])){
+        if(checkEntry(entry, args[1])){
             return false;
         } else if (entry.getActiveChallenges().isEmpty()){
             plugin.sendMessage(sender, args[1] + " has no active challenges!");
@@ -149,7 +149,7 @@ public class SeasonsCommand extends Command {
         UUID uuid = Bukkit.getPlayer(args[1]).getUniqueId();
 
         Entry entry = plugin.getDataHandler().getEntry(uuid);
-        if(!checkEntry(entry, args[2])){
+        if(checkEntry(entry, args[2])){
             return false;
         }
 
@@ -164,6 +164,10 @@ public class SeasonsCommand extends Command {
     }
 
     public boolean openGui(){
+        if(args.length != 2){
+            plugin.sendMessage(sender, INCORRECT_NUM_ARGUMENTS);
+            return false;
+        }
         plugin.getGui().getGui().show(Bukkit.getPlayer(args[1]));
         return true;
     }
@@ -175,9 +179,9 @@ public class SeasonsCommand extends Command {
     public boolean checkEntry(Entry entry, String name){
         if(entry == null){
             plugin.sendMessage(sender, "I do not have any record of " + name + "!");
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 
 }

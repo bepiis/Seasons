@@ -73,8 +73,9 @@ gui:
   first: 'SIGN'
   last: 'SIGN'
   progressbar:
-    notfinished: 'LIGHT_GRAY_STAINED_GLASS_PANE'
-    finished: 'LIGHT_GREEN_STAINED_GLASS_PANE'
+    notfinished: 'GRAY_STAINED_GLASS_PANE'
+    finished: 'GREEN_STAINED_GLASS_PANE'
+    current: 'BLACK_STAINED_GLASS_PANE'
 
 storage:
   type:

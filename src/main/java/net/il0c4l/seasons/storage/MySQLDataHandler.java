@@ -1,5 +1,6 @@
 package net.il0c4l.seasons.storage;
 
+import jdk.internal.loader.AbstractClassLoaderValue;
 import net.il0c4l.seasons.Main;
 
 import java.sql.*;
@@ -16,7 +17,7 @@ public class MySQLDataHandler extends DataHandler {
     private Main plugin;
     private static Connection connection;
     private final Logger logger;
-    private final String tableName;
+    private final String entryTableName, subEntryTableName;
 
     public MySQLDataHandler(final Main plugin, String username, String password, String host, String port, String dbName, String useSSL){
         super(plugin);
@@ -26,7 +27,8 @@ public class MySQLDataHandler extends DataHandler {
         URL = String.format("jdbc:mysql://%1$s:%2$s/%3$s?allowPublicKeyRetrieval=true&useSSL=%4$s", host, port, dbName, useSSL);
         logger = plugin.getLogger();
         openConnection();
-        tableName = "seasons";
+        entryTableName = "entries";
+        subEntryTableName = "subentries";
         createTable();
     }
 
@@ -58,11 +60,17 @@ public class MySQLDataHandler extends DataHandler {
     }
     
     public void createTable(){
-        String sql = "CREATE TABLE IF NOT EXISTS " + tableName + "(" + 
+        String sql = "CREATE TABLE IF NOT EXISTS " + entryTableName + "(" +
                 "uuid VARCHAR(64) NOT NULL, " +
-                "command VARCHAR(64) NOT NULL, " + 
-                "progress INT NOT NULL, " + 
+                "points DOUBLE NOT NULL, " +
                 "PRIMARY KEY ( uuid ) " +
+        ");" +
+                "CREATE TABLE IF NOT EXISTS " + subEntryTableName + "(" +
+                "uuid VARCHAR(64) NOT NULL, " +
+                "command VARCHAR(64) NOT NULL," +
+                "progress INT NOT NULL," +
+                "PRIMARY KEY ( uuid ), " +
+                "FOREIGN KEY ( uuid ) REFERENCES " + entryTableName + "( uuid )" +
         ");";
         try{
             PreparedStatement ps = connection.prepareStatement(sql);
@@ -72,11 +80,42 @@ public class MySQLDataHandler extends DataHandler {
             logger.log(Level.SEVERE, SQL_EXCEPTION);
         }
     }
+
+    @Override
+    public CompletableFuture<Void> syncOneEntryAsync(Entry entry){
+        return CompletableFuture.runAsync(() -> {
+            String stmt = "INSERT INTO " + entryTableName + " (uuid, points) VALUES (?, ?)";
+            String subStmt = "INSERT INTO " + subEntryTableName + " (uuid, command, progress) VALUES (?, ?, ?)";
+
+            try{
+                PreparedStatement ps = connection.prepareStatement(stmt);
+                ps.setString(1, entry.getUUID().toString());
+                ps.setDouble(2, entry.getPoints());
+
+                ps.executeUpdate();
+                ps.close();
+
+                PreparedStatement pss = connection.prepareStatement(subStmt);
+                for(SubEntry subEntry : entry.getActiveChallenges()){
+                    pss.setString(1, subEntry.getUUID().toString());
+                    pss.setString(2, subEntry.getCommand());
+                    pss.setInt(3, subEntry.getProgress());
+                }
+
+                pss.executeUpdate();
+                pss.close();
+
+        } catch(SQLException e){
+                e.printStackTrace();
+                logger.log(Level.SEVERE, SQL_EXCEPTION);
+            }
+        }, plugin.getThreadPool());
+    }
     
     @Override
     public void syncEntries(){
         CompletableFuture.runAsync(() -> {
-            String sql = "INSERT INTO " + tableName + " (uuid, command, progress) VALUES (? ,?, ?)";
+            String sql = "INSERT INTO " + entryTableName + " (uuid, command, progress) VALUES (? ,?, ?)";
             try{
                 PreparedStatement ps = connection.prepareStatement(sql);
                 
@@ -102,31 +141,34 @@ public class MySQLDataHandler extends DataHandler {
         }, plugin.getThreadPool());
     }
 
-    public ArrayList<Entry> getEntriesFromStorage() {
-        ArrayList<Entry> entries = new ArrayList<>();
-        openConnection();
-        try {
-            PreparedStatement ps = connection.prepareStatement("SELECT * FROM " + tableName);
-            ResultSet result = ps.executeQuery();
-
-            while (result.next()) {
-                UUID uuid = UUID.fromString(result.getString("uuid"));
-                String command = result.getString("command");
-                int progress = result.getInt("progress");
-
-                //entries.add(new Entry(uuid, command, progress));
-            }
-            ps.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            logger.log(Level.SEVERE, SQL_EXCEPTION);
-        }
-        return entries;
-    }
-
     @Override
     public CompletableFuture<List<Entry>> getEntriesFromStorageAsync(){
-        return null;
+        return CompletableFuture.supplyAsync(() -> {
+            List<Entry> entries = new ArrayList<>();
+            try{
+                PreparedStatement ps = connection.prepareStatement("SELECT * FROM " +  entryTableName);
+                ResultSet result = ps.executeQuery();
+
+                while(result.next()){
+                    String uuid = result.getString("uuid");
+                    double points = result.getDouble("points");
+
+                    PreparedStatement pss = connection.prepareStatement("SELECT * FROM " + subEntryTableName + " WHERE uuid = " + uuid);
+                    ResultSet subResult = pss.executeQuery();
+                    List<SubEntry> subEntries = new ArrayList<>();
+                    while(subResult.next()){
+                        String command = subResult.getString("command");
+                        int progress = subResult.getInt("progress");
+                        subEntries.add(new SubEntry(UUID.fromString(uuid), command, progress, false));
+                    }
+                    entries.add(new Entry(UUID.fromString(uuid), subEntries, points));
+                }
+            } catch(SQLException e){
+                e.getErrorCode();
+                logger.log(Level.SEVERE, SQL_EXCEPTION);
+            }
+            return entries;
+        }, plugin.getThreadPool());
     }
 
     @Override
@@ -134,8 +176,7 @@ public class MySQLDataHandler extends DataHandler {
         return null;
     }
 
-    @Override
-    public CompletableFuture<Void> syncOneEntryAsync(Entry entry){ return null; }
+
     
     public static String DRIVER_NOT_FOUND = "jbdc driver not loaded!";
     public static String SQL_EXCEPTION = "An error occurred while communicating with your sql server!";
